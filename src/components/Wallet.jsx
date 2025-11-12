@@ -18,38 +18,43 @@ export const WalletProvider = ({ children }) => {
     // Effect for session restoration from localStorage and then live session
     useEffect(() => {
         const restoreSession = async () => {
-            try {
-                const savedSession = localStorage.getItem('proton-session');
-                if (savedSession) {
-                    const parsedSession = JSON.parse(savedSession);
-                    // Attempt to restore a live session using the parsed data
-                    // The ProtonWebSDK function itself can restore a session if restoreSession: true is passed
-                    const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
-                        linkOptions: { endpoints: ['https://proton.greymass.com'] },
-                        transportOptions: { requestStatus: false },
-                        selectorOptions: {
-                                                                            appName: '11dice',
-                                                                        },                        restoreSession: true, // Try to restore live session
-                    });
-
-                    if (restoredSession) {
-                        setSession(restoredSession);
-                        setLink(restoredLink);
-                        localStorage.setItem('proton-session', JSON.stringify(restoredSession)); // Update localStorage with live session
-                    } else {
-                        // If live session couldn't be restored, clear local storage
-                        localStorage.removeItem('proton-session');
-                        setSession(null);
-                        setLink(null);
-                    }
-                }
-            } catch (e) {
-                console.error("Session restore failed", e);
-                localStorage.removeItem('proton-session'); // Clear on error
-            }
-        };
-        restoreSession();
-    }, []); // Run once on mount
+                        try {
+                            const savedSession = localStorage.getItem('proton-session');
+                            console.log("localStorage savedSession:", savedSession); // Debug log
+                            if (savedSession) {
+                                const parsedSession = JSON.parse(savedSession);
+                                // Attempt to restore a live session using the parsed data
+                                // The ProtonWebSDK function itself can restore a session if restoreSession: true is passed
+                                const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
+                                    linkOptions: { endpoints: ['https://proton.greymass.com'] },
+                                    transportOptions: { requestStatus: false },
+                                    selectorOptions: {
+                                        appName: '11dice',
+                                    },
+                                    restoreSession: true, // Try to restore live session
+                                });
+                                console.log("ProtonWebSDK restoredSession:", restoredSession); // Debug log
+                                console.log("ProtonWebSDK restoredLink:", restoredLink); // Debug log
+            
+                                if (restoredSession) {
+                                    setSession(restoredSession);
+                                    setLink(restoredLink);
+                                    localStorage.setItem('proton-session', JSON.stringify(restoredSession)); // Update localStorage with live session
+                                } else {
+                                    // If live session couldn't be restored, clear local storage
+                                    console.log("Live session could not be restored, clearing localStorage."); // Debug log
+                                    localStorage.removeItem('proton-session');
+                                    setSession(null);
+                                    setLink(null);
+                                }
+                            }
+                        } catch (e) {
+                            console.error("Session restore failed", e);
+                            localStorage.removeItem('proton-session'); // Clear on error
+                        }
+                    };
+                    restoreSession();
+                }, []); // Run once on mount
 
     const login = async () => {
         try {
