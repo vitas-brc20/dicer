@@ -26,7 +26,7 @@ export const WalletProvider = ({ children }) => {
                 console.log("Attempting to restore session from localStorage details...");
                 console.log("  savedActor:", savedActor);
                 console.log("  savedPermission:", savedPermission);
-                console.log("  savedChainId:", savedChainId);
+                console.log("  savedChainId from localStorage:", savedChainId); // New debug log
                 try {
                     // Try to re-establish session using saved details
                     const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
