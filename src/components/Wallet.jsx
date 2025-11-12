@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const WalletContext = createContext({
     session: null,
-    link: null,
+    auth: null, // Add auth to context for consistency, though not directly used by consumers
     login: async () => {},
     logout: async () => {},
     transact: async (actions) => { throw new Error("Wallet not connected"); }
@@ -12,63 +12,53 @@ const WalletContext = createContext({
 
 export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
-    const [link, setLink] = useState(null);
+    const [auth, setAuth] = useState(null);
 
-    // Effect for session restoration
     useEffect(() => {
-        const restore = async () => {
+        const initAuth = async () => {
             try {
-                const { ConnectWallet } = await import('@proton/web-sdk');
-                const { link: restoredLink, session: restoredSession } = await ConnectWallet({
-                    linkOptions: {
-                        endpoints: ['https://proton.greymass.com'],
-                        restoreSession: true,
-                    },
-                    selectorOptions: {
-                        appName: '11dice',
-                        requestAccount: '11dice',
-                    }
-                });
+                const WebAuthModule = await import('@proton/web-sdk');
+                // Try to get the constructor. It could be default, or default.default, or directly on the module.
+                const WebAuth = WebAuthModule.default || WebAuthModule; 
+                
+                const appName = '11dice';
+                const requestAccount = '11dice'; 
+                const newAuth = new WebAuth({ appName, requestAccount, chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace43922A9D974E' }); // Proton Mainnet
+                setAuth(newAuth);
 
-                if (restoredSession) {
-                    setSession(restoredSession);
-                    setLink(restoredLink);
+                // Restore session
+                const restored = await newAuth.restoreSession();
+                if (restored) {
+                    setSession(restored);
                 }
             } catch (e) {
-                console.error("Session restore failed", e);
+                console.error("Auth initialization failed", e);
             }
         };
-        restore();
+        
+        initAuth();
     }, []);
 
     const login = async () => {
+        if (!auth) {
+            console.error("Auth not initialized yet");
+            return;
+        }
         try {
-            const { ConnectWallet } = await import('@proton/web-sdk');
-            const { link: newLink, session: newSession } = await ConnectWallet({
-                linkOptions: {
-                    endpoints: ['https://proton.greymass.com'],
-                },
-                selectorOptions: {
-                    appName: '11dice',
-                    requestAccount: '11dice',
-                }
-            });
+            const newSession = await auth.login();
             setSession(newSession);
-            setLink(newLink);
         } catch (e) {
             console.error("Login failed", e);
         }
     };
 
     const logout = async () => {
-        if (link && session) {
-            try {
-                await link.removeSession('11dice', session.auth);
-                setSession(null);
-                setLink(null);
-            } catch (e) {
-                console.error("Logout failed", e);
-            }
+        if (!auth || !session) return;
+        try {
+            await auth.logout();
+            setSession(null);
+        } catch (e) {
+            console.error("Logout failed", e);
         }
     };
 
@@ -85,7 +75,7 @@ export const WalletProvider = ({ children }) => {
     };
 
     return (
-        <WalletContext.Provider value={{ session, link, login, logout, transact }}>
+        <WalletContext.Provider value={{ session, auth, login, logout, transact }}>
             {children}
         </WalletContext.Provider>
     );
