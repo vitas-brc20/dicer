@@ -34,7 +34,6 @@ export const WalletProvider = ({ children }) => {
                         transportOptions: { requestStatus: false },
                         selectorOptions: {
                             appName: '11dice',
-                            requestAccount: savedActor, // Use saved actor
                         },
                         restoreSession: true, // Use SDK's restore mechanism with hint
                     });
