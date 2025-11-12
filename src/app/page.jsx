@@ -102,22 +102,9 @@ const GameInterface = () => {
             }
             const roll = parseInt(rollMatch[1], 10);
             setDiceResult(roll);
-            setStatus('Roll successful! Recording result...');
+            setStatus('Roll successful! Refreshing balance...');
 
-            // 4. Record the roll in our DB
-            const recordResult = await fetch('/api/record', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ actor: session.auth.actor, roll: roll }),
-            });
-
-            if (!recordResult.ok) {
-                const { error } = await recordResult.json();
-                throw new Error(`Failed to record result: ${error}`);
-            }
-            setStatus('Roll recorded! Refreshing balance...');
-
-            // 5. Refresh balance
+            // 4. Refresh balance
             await refreshBalance();
 
         } catch (e) {
