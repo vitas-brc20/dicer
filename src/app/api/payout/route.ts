@@ -100,7 +100,7 @@ export async function POST(request: Request) {
             winnerCount: winners.length,
             prizePool: `${prizePool.toFixed(4)} XPR`,
             individualPayout: payoutAsset,
-            transactionId: result.transaction_id,
+            transactionId: (result as any).transaction_id,
         });
 
     } catch (error) {
