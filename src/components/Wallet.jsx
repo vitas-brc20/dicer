@@ -22,7 +22,7 @@ export const WalletProvider = ({ children }) => {
         const appName = '11dice';
         // IMPORTANT: Replace with your contract account name
         const requestAccount = '11dice'; 
-        const auth = new WebAuth({ appName, requestAccount, chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace43922A9D974E' }); // Proton Mainnet
+        const auth = new (WebAuth.default || WebAuth)({ appName, requestAccount, chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace43922A9D974E' }); // Proton Mainnet
         setAuth(auth);
 
         // Restore session
