@@ -32,7 +32,7 @@ public:
      * @param payout_id - The ID of the payout entry to process.
      */
     [[eosio::action]]
-    void processpayout(uint64_t payout_id);
+    void procpay(uint64_t payout_id);
 
     /**
      * @brief Notification handler for token transfers.
