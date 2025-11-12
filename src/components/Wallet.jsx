@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+"use client";
+
+import React, { createContext, useContext, useState, useEffect } = 'react';
 import ProtonWebSDK from '@proton/web-sdk'; // Use the default import as a function
 
 const WalletContext = createContext({
