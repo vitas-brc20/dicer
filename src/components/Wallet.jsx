@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import WebAuth from '@proton/web-sdk';
 
 // Create the context with a default shape
 const WalletContext = createContext({
@@ -16,31 +15,35 @@ export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
     const [auth, setAuth] = useState(null);
 
-
     useEffect(() => {
-        // Initialize WebAuth
-        const appName = '11dice';
-        // IMPORTANT: Replace with your contract account name
-        const requestAccount = '11dice'; 
-        const auth = new (WebAuth.default || WebAuth)({ appName, requestAccount, chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace43922A9D974E' }); // Proton Mainnet
-        setAuth(auth);
-
-        // Restore session
-        const restoreSession = async () => {
+        const initAuth = async () => {
             try {
-                const restored = await auth.restoreSession();
+                // Dynamically import and extract the default export which is the WebAuth class
+                const { default: WebAuth } = await import('@proton/web-sdk');
+                
+                const appName = '11dice';
+                const requestAccount = '11dice'; 
+                const newAuth = new WebAuth({ appName, requestAccount, chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace43922A9D974E' }); // Proton Mainnet
+                setAuth(newAuth);
+
+                // Restore session
+                const restored = await newAuth.restoreSession();
                 if (restored) {
                     setSession(restored);
                 }
             } catch (e) {
-                console.error("Session restore failed", e);
+                console.error("Auth initialization failed", e);
             }
         };
-        restoreSession();
+        
+        initAuth();
     }, []);
 
     const login = async () => {
-        if (!auth) return;
+        if (!auth) {
+            console.error("Auth not initialized yet");
+            return;
+        }
         try {
             const newSession = await auth.login();
             setSession(newSession);
@@ -83,6 +86,8 @@ export const WalletProvider = ({ children }) => {
 export const useWallet = () => {
     const context = useContext(WalletContext);
     if (!context) {
+        // This error is now unlikely to happen due to the default context value,
+        // but it's good practice to keep it for cases where the provider is accidentally removed.
         throw new Error('useWallet must be used within a WalletProvider');
     }
     return context;
