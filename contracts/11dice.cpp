@@ -22,6 +22,15 @@ void onedice::rolldice(name account) {
     // For a real-world application, a more robust oracle-based solution would be better.
     uint8_t dice_roll = (static_cast<uint8_t>(current_time_point().elapsed.count() % 6)) + 1;
     print("DICE_ROLL:", dice_roll); // Add this line
+
+    // Record the roll in the new roll_entries_table
+    roll_entries_table rolls(get_self(), get_self().value);
+    rolls.emplace(account, [&](auto& row) {
+        row.id = rolls.available_primary_key();
+        row.player_account = account;
+        row.roll_result = dice_roll;
+        row.roll_time = current_time_point();
+    });
 }
 
 void onedice::on_transfer(name from, name to, asset quantity, std::string memo) {
