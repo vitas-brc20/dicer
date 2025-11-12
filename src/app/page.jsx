@@ -90,12 +90,17 @@ const GameInterface = () => {
                 data: { account: session.auth.actor },
             }]);
 
-            // 3. Parse result and show dice roll
-            const logRollTrace = result.processed.action_traces.find(trace => trace.act.name === 'logroll');
-            if (!logRollTrace) {
-                throw new Error('Could not find roll result in transaction.');
+            // 3. Parse result and show dice roll from console output
+            const rolldiceTrace = result.processed.action_traces.find(trace => trace.act.name === 'rolldice');
+            if (!rolldiceTrace || !rolldiceTrace.console) {
+                throw new Error('Could not find rolldice trace or console output in transaction.');
             }
-            const roll = logRollTrace.act.data.roll;
+            const consoleOutput = rolldiceTrace.console;
+            const rollMatch = consoleOutput.match(/DICE_ROLL:(\d+)/);
+            if (!rollMatch || rollMatch.length < 2) {
+                throw new Error('Could not parse dice roll from console output.');
+            }
+            const roll = parseInt(rollMatch[1], 10);
             setDiceResult(roll);
             setStatus('Roll successful! Recording result...');
 

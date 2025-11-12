@@ -21,9 +21,7 @@ void onedice::rolldice(name account) {
     // Simple pseudo-random number generation based on block info
     // For a real-world application, a more robust oracle-based solution would be better.
     uint8_t dice_roll = (static_cast<uint8_t>(current_time_point().elapsed.count() % 6)) + 1;
-
-    // The dice_roll result can be read by off-chain services directly from the transaction trace
-    // of the rolldice action itself. No need for a separate inline action.
+    print("DICE_ROLL:", dice_roll); // Add this line
 }
 
 void onedice::on_transfer(name from, name to, asset quantity, std::string memo) {
