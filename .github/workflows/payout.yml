@@ -1,0 +1,17 @@
+name: Daily Payout
+
+on:
+  schedule:
+    # Runs at 14:11 UTC every day, which is 23:11 KST.
+    - cron: '11 14 * * *'
+  workflow_dispatch: # Allows manual triggering from the GitHub UI for testing.
+
+jobs:
+  run-payout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Payout API
+        run: |
+          curl --request POST \
+            --url '${{ secrets.PAYOUT_URL }}' \
+            --header 'Authorization: Bearer ${{ secrets.CRON_SECRET }}'
