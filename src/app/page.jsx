@@ -23,11 +23,11 @@ const GameInterface = () => {
     const [diceResult, setDiceResult] = useState(null);
 
     const refreshBalance = async () => {
-        if (!session?.actor) return;
+        if (!session?.auth?.actor) return;
         setLoading(true);
         setStatus('Refreshing balance...');
         try {
-            const balance = await getTicketBalance(session.actor);
+            const balance = await getTicketBalance(session.auth.actor);
             setTicketBalance(balance);
             setStatus('');
         } catch (e) {
@@ -38,7 +38,7 @@ const GameInterface = () => {
     };
 
     useEffect(() => {
-        if (session?.actor) {
+        if (session?.auth?.actor) {
             refreshBalance();
         }
     }, [session]);
@@ -52,8 +52,8 @@ const GameInterface = () => {
             await transact([{
                 account: 'eosio.token',
                 name: 'transfer',
-                authorization: [{ actor: session.actor, permission: session.permission }],
-                data: { from: session.actor, to: '11dice', quantity: '11.0000 XPR', memo: 'buy 11dice ticket' },
+                authorization: [{ actor: session.auth.actor, permission: session.auth.permission }],
+                data: { from: session.auth.actor, to: '11dice', quantity: '11.0000 XPR', memo: 'buy 11dice ticket' },
             }]);
             setStatus('Purchase successful! Refreshing balance...');
             await refreshBalance();
@@ -86,8 +86,8 @@ const GameInterface = () => {
             const result = await transact([{
                 account: '11dice', // The contract account
                 name: 'rolldice',
-                authorization: [{ actor: session.actor, permission: session.permission }],
-                data: { account: session.actor },
+                authorization: [{ actor: session.auth.actor, permission: session.auth.permission }],
+                data: { account: session.auth.actor },
             }]);
 
             // 3. Parse result and show dice roll
@@ -103,7 +103,7 @@ const GameInterface = () => {
             const recordResult = await fetch('/api/record', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ actor: session.actor, roll: roll }),
+                body: JSON.stringify({ actor: session.auth.actor, roll: roll }),
             });
 
             if (!recordResult.ok) {
@@ -161,7 +161,7 @@ const GameInterface = () => {
 
     return (
         <div className="text-center">
-            <p className="mb-4">Welcome, <span className="font-bold">{session?.actor}</span>!</p>
+            <p className="mb-4">Welcome, <span className="font-bold">{session?.auth?.actor}</span>!</p>
             <div className="my-8 p-6 border rounded-lg border-gray-600 min-h-[150px] flex items-center justify-center">
                 {renderGameControls()}
             </div>

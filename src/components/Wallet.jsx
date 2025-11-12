@@ -2,63 +2,73 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Create the context with a default shape
 const WalletContext = createContext({
     session: null,
+    link: null,
     login: async () => {},
     logout: async () => {},
-    transact: async (actions) => {}
+    transact: async (actions) => { throw new Error("Wallet not connected"); }
 });
 
-// The provider component that will wrap our app
 export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
-    const [auth, setAuth] = useState(null);
+    const [link, setLink] = useState(null);
 
+    // Effect for session restoration
     useEffect(() => {
-        const initAuth = async () => {
+        const restore = async () => {
             try {
-                // Dynamically import and extract the default export which is the WebAuth class
-                const { default: WebAuth } = await import('@proton/web-sdk');
-                
-                const appName = '11dice';
-                const requestAccount = '11dice'; 
-                const newAuth = new WebAuth({ appName, requestAccount, chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace43922A9D974E' }); // Proton Mainnet
-                setAuth(newAuth);
+                const { ConnectWallet } = await import('@proton/web-sdk');
+                const { link: restoredLink, session: restoredSession } = await ConnectWallet({
+                    linkOptions: {
+                        endpoints: ['https://proton.greymass.com'],
+                        restoreSession: true,
+                    },
+                    selectorOptions: {
+                        appName: '11dice',
+                        requestAccount: '11dice',
+                    }
+                });
 
-                // Restore session
-                const restored = await newAuth.restoreSession();
-                if (restored) {
-                    setSession(restored);
+                if (restoredSession) {
+                    setSession(restoredSession);
+                    setLink(restoredLink);
                 }
             } catch (e) {
-                console.error("Auth initialization failed", e);
+                console.error("Session restore failed", e);
             }
         };
-        
-        initAuth();
+        restore();
     }, []);
 
     const login = async () => {
-        if (!auth) {
-            console.error("Auth not initialized yet");
-            return;
-        }
         try {
-            const newSession = await auth.login();
+            const { ConnectWallet } = await import('@proton/web-sdk');
+            const { link: newLink, session: newSession } = await ConnectWallet({
+                linkOptions: {
+                    endpoints: ['https://proton.greymass.com'],
+                },
+                selectorOptions: {
+                    appName: '11dice',
+                    requestAccount: '11dice',
+                }
+            });
             setSession(newSession);
+            setLink(newLink);
         } catch (e) {
             console.error("Login failed", e);
         }
     };
 
     const logout = async () => {
-        if (!auth || !session) return;
-        try {
-            await auth.logout();
-            setSession(null);
-        } catch (e) {
-            console.error("Logout failed", e);
+        if (link && session) {
+            try {
+                await link.removeSession('11dice', session.auth);
+                setSession(null);
+                setLink(null);
+            } catch (e) {
+                console.error("Logout failed", e);
+            }
         }
     };
 
@@ -67,8 +77,7 @@ export const WalletProvider = ({ children }) => {
             throw new Error("Cannot transact without a session");
         }
         try {
-            const result = await session.transact({ actions });
-            return result;
+            return await session.transact({ actions });
         } catch (e) {
             console.error("Transaction failed", e);
             throw e;
@@ -76,18 +85,15 @@ export const WalletProvider = ({ children }) => {
     };
 
     return (
-        <WalletContext.Provider value={{ session, login, logout, transact }}>
+        <WalletContext.Provider value={{ session, link, login, logout, transact }}>
             {children}
         </WalletContext.Provider>
     );
 };
 
-// Custom hook to use the wallet context
 export const useWallet = () => {
     const context = useContext(WalletContext);
     if (!context) {
-        // This error is now unlikely to happen due to the default context value,
-        // but it's good practice to keep it for cases where the provider is accidentally removed.
         throw new Error('useWallet must be used within a WalletProvider');
     }
     return context;
