@@ -4,7 +4,7 @@ import { JsonRpc } from '@proton/js';
 const rpc = new JsonRpc(['https://proton.greymass.com']); 
 
 // TODO: Replace with your contract account name
-const CONTRACT_ACCOUNT = '11dice';
+const CONTRACT_ACCOUNT = 'inchgame';
 
 /**
  * Fetches the ticket balance for a given account from the smart contract.
