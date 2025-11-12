@@ -23,6 +23,10 @@ export const WalletProvider = ({ children }) => {
             const savedChainId = localStorage.getItem('proton_chainId');
 
             if (savedActor && savedPermission && savedChainId) {
+                console.log("Attempting to restore session from localStorage details...");
+                console.log("  savedActor:", savedActor);
+                console.log("  savedPermission:", savedPermission);
+                console.log("  savedChainId:", savedChainId);
                 try {
                     // Try to re-establish session using saved details
                     const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
@@ -32,15 +36,16 @@ export const WalletProvider = ({ children }) => {
                             appName: '11dice',
                             requestAccount: savedActor, // Use saved actor
                         },
-                        // Do NOT use restoreSession: true here, as we are manually providing details
+                        restoreSession: true, // Use SDK's restore mechanism with hint
                     });
 
                     if (restoredSession) {
                         setSession(restoredSession);
                         setLink(restoredLink);
                         console.log("Restored session from localStorage details:", restoredSession);
+                        console.log("Restored link from localStorage details:", restoredLink);
                     } else {
-                        console.log("Could not re-establish session with saved details.");
+                        console.log("Could not re-establish session with saved details (ProtonWebSDK returned null).");
                         localStorage.removeItem('proton_actor');
                         localStorage.removeItem('proton_permission');
                         localStorage.removeItem('proton_chainId');
@@ -51,6 +56,8 @@ export const WalletProvider = ({ children }) => {
                     localStorage.removeItem('proton_permission');
                     localStorage.removeItem('proton_chainId');
                 }
+            } else {
+                console.log("No saved session details found in localStorage.");
             }
         };
         restoreSessionFromLocalStorage();

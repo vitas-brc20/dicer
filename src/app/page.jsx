@@ -23,14 +23,20 @@ const GameInterface = () => {
     const [diceResult, setDiceResult] = useState(null);
 
     const refreshBalance = async () => {
-        if (!session?.auth?.actor) return;
+        console.log("refreshBalance called. session.auth.actor:", session?.auth?.actor);
+        if (!session?.auth?.actor) {
+            console.log("refreshBalance: No session actor, returning.");
+            return;
+        }
         setLoading(true);
         setStatus('Refreshing balance...');
         try {
             const balance = await getTicketBalance(session.auth.actor);
+            console.log("refreshBalance: Fetched balance:", balance);
             setTicketBalance(balance);
             setStatus('');
         } catch (e) {
+            console.error("refreshBalance: Failed to refresh balance:", e);
             setStatus('Failed to refresh balance.');
         } finally {
             setLoading(false);
@@ -56,7 +62,9 @@ const GameInterface = () => {
                 data: { from: session.auth.actor, to: 'inchgame', quantity: '11.0000 XPR', memo: 'buy 11dice ticket' },
             }]);
             setStatus('Purchase successful! Refreshing balance...');
+            console.log("handleBuyTicket: Calling refreshBalance after purchase.");
             await refreshBalance();
+            console.log("handleBuyTicket: refreshBalance completed after purchase.");
         } catch (e) {
             if (e instanceof Error) {
                 setStatus(`Purchase failed: ${e.message}`);
