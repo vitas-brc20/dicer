@@ -1,4 +1,5 @@
 #include "11dice.hpp"
+#include <eosio/system.hpp> // Explicitly include for tapos_block_prefix()
 
 // Constants for the game
 const symbol XPR_SYMBOL = symbol("XPR", 4);
