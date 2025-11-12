@@ -58,7 +58,11 @@ const GameInterface = () => {
             setStatus('Purchase successful! Refreshing balance...');
             await refreshBalance();
         } catch (e) {
-            setStatus(`Purchase failed: ${e.message}`);
+            if (e instanceof Error) {
+                setStatus(`Purchase failed: ${e.message}`);
+            } else {
+                setStatus(`Purchase failed: An unknown error occurred.`);
+            }
             setLoading(false);
         }
     };
@@ -112,7 +116,11 @@ const GameInterface = () => {
             await refreshBalance();
 
         } catch (e) {
-            setStatus(`Roll failed: ${e.message}`);
+            if (e instanceof Error) {
+                setStatus(`Roll failed: ${e.message}`);
+            } else {
+                setStatus(`Roll failed: An unknown error occurred.`);
+            }
             setLoading(false);
         }
     };
