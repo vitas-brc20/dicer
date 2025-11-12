@@ -95,6 +95,7 @@ void onedice::drawresult() {
     }
 }
 
+[[eosio::action]]
 void onedice::processpayout(uint64_t payout_id) {
     require_auth(get_self()); // Only the contract itself can call this action
 
