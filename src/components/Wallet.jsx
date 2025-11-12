@@ -21,11 +21,6 @@ export const WalletProvider = ({ children }) => {
             try {
                 const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
                     linkOptions: { endpoints: ['https://proton.greymass.com'] },
-                    transportOptions: { requestStatus: false },
-                    selectorOptions: {
-                        appName: '11dice',
-                        requestAccount: 'inchgame',
-                    },
                     restoreSession: true, // Rely on SDK to restore session
                 });
 
