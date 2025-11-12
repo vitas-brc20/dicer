@@ -75,22 +75,39 @@ void onedice::drawresult() {
     // or just iterate and send. For simplicity, we'll iterate and send for now.
     // A more optimized approach would sum up payouts per unique winner.
 
-    // Distribute payouts
+    // Distribute payouts (queue for external processing)
+    payout_queue_table payouts(get_self(), get_self().value);
     for (const auto& winner_account : winners) {
         asset payout_quantity = asset(static_cast<int64_t>(payout_per_winner_entry), XPR_SYMBOL);
-        action(
-            permission_level{get_self(), "eosio.code"_n},
-            "eosio.token"_n,
-            "transfer"_n,
-            std::make_tuple(get_self(), winner_account, payout_quantity, std::string("11dice daily payout"))
-        ).send();
+        payouts.emplace(get_self(), [&](auto& row) { // Payer is contract itself
+            row.id = payouts.available_primary_key();
+            row.winner_account = winner_account;
+            row.payout_amount = payout_quantity;
+            row.created_time = current_time_point();
+            row.processed = false;
+        });
     }
 
-    // Clear today's rolls after payout
+    // Clear today's rolls after payout determination
     itr = rolls_by_time.lower_bound(current_day_start.sec_since_epoch());
     while (itr != rolls_by_time.end() && itr->roll_time < next_day_start) {
         itr = rolls_by_time.erase(itr);
     }
+}
+
+void onedice::processpayout(uint64_t payout_id) {
+    require_auth(get_self()); // Only the contract itself can call this action
+
+    payout_queue_table payouts(get_self(), get_self().value);
+    auto itr = payouts.find(payout_id);
+
+    check(itr != payouts.end(), "Payout entry not found.");
+    check(!itr->processed, "Payout entry already processed.");
+
+    // Mark as processed
+    payouts.modify(itr, get_self(), [&](auto& row) {
+        row.processed = true;
+    });
 }
 
 void onedice::on_transfer(name from, name to, asset quantity, std::string memo) {
