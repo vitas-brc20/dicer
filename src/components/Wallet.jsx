@@ -31,11 +31,10 @@ export const WalletProvider = ({ children }) => {
                     // Try to re-establish session using saved details
                     const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
                         linkOptions: { endpoints: ['https://proton.greymass.com'], chainId: savedChainId },
-                        transportOptions: { requestStatus: false },
                         selectorOptions: {
                             appName: '11dice',
                         },
-                        restoreSession: true, // Use SDK's restore mechanism with hint
+                        restoreSession: true, // Use SDK's restore mechanism
                     });
 
                     if (restoredSession) {
