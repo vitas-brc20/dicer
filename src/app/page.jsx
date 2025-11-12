@@ -136,22 +136,21 @@ const GameInterface = () => {
         return (
             <div>
                 <p className="text-lg">Your tickets: <span className="font-bold text-yellow-400">{ticketBalance}</span></p>
-                <div className="mt-6">
-                    {ticketBalance > 0 ? (
+                <div className="mt-6 flex flex-col space-y-4"> {/* Added flex and space-y for layout */}
+                    <button 
+                        onClick={handleBuyTicket}
+                        className="px-6 py-3 bg-purple-600 text-white text-lg rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-500"
+                        disabled={loading}
+                    >
+                        Buy Ticket (11 XPR)
+                    </button>
+                    {ticketBalance > 0 && ( // Conditionally render Roll Dice button
                         <button 
                             onClick={handleRollDice}
                             className="px-8 py-4 bg-green-600 text-white text-xl font-semibold rounded-lg hover:bg-green-700 transition-transform hover:scale-105 disabled:bg-gray-500"
                             disabled={loading}
                         >
                             Roll Dice
-                        </button>
-                    ) : (
-                        <button 
-                            onClick={handleBuyTicket}
-                            className="px-6 py-3 bg-purple-600 text-white text-lg rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-500"
-                            disabled={loading}
-                        >
-                            Buy Ticket (11 XPR)
                         </button>
                     )}
                 </div>
