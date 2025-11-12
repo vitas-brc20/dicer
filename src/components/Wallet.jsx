@@ -1,10 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import ProtonWebSDK from '@proton/web-sdk'; // Use the default import as a function
 
 const WalletContext = createContext({
     session: null,
-    auth: null, // Add auth to context for consistency, though not directly used by consumers
     login: async () => {},
     logout: async () => {},
     transact: async (actions) => { throw new Error("Wallet not connected"); }
@@ -12,40 +12,42 @@ const WalletContext = createContext({
 
 export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
-    const [auth, setAuth] = useState(null);
 
+    // Effect for session restoration
     useEffect(() => {
-        const initAuth = async () => {
+        const restore = async () => {
             try {
-                const WebAuthModule = await import('@proton/web-sdk');
-                // Try to get the constructor. It could be default, or default.default, or directly on the module.
-                const WebAuth = WebAuthModule.default || WebAuthModule; 
-                
-                const appName = '11dice';
-                const requestAccount = '11dice'; 
-                const newAuth = new WebAuth({ appName, requestAccount, chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace43922A9D974E' }); // Proton Mainnet
-                setAuth(newAuth);
+                const { session: restoredSession } = await ProtonWebSDK({
+                    linkOptions: { endpoints: ['https://proton.greymass.com'] },
+                    transportOptions: { requestStatus: false },
+                    selectorOptions: {
+                        appName: '11dice',
+                        requestAccount: '11dice',
+                    },
+                    restoreSession: true, // Explicitly try to restore session
+                });
 
-                // Restore session
-                const restored = await newAuth.restoreSession();
-                if (restored) {
-                    setSession(restored);
+                if (restoredSession) {
+                    setSession(restoredSession);
                 }
             } catch (e) {
-                console.error("Auth initialization failed", e);
+                console.error("Session restore failed", e);
             }
         };
-        
-        initAuth();
+        restore();
     }, []);
 
     const login = async () => {
-        if (!auth) {
-            console.error("Auth not initialized yet");
-            return;
-        }
         try {
-            const newSession = await auth.login();
+            const { session: newSession } = await ProtonWebSDK({
+                linkOptions: { endpoints: ['https://proton.greymass.com'] },
+                transportOptions: { requestStatus: false },
+                selectorOptions: {
+                    appName: '11dice',
+                    appLogo: 'https://avatars.githubusercontent.com/u/6749354?s=200&v=4', // Example logo from snippet
+                    requestAccount: '11dice',
+                },
+            });
             setSession(newSession);
         } catch (e) {
             console.error("Login failed", e);
@@ -53,12 +55,13 @@ export const WalletProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        if (!auth || !session) return;
-        try {
-            await auth.logout();
-            setSession(null);
-        } catch (e) {
-            console.error("Logout failed", e);
+        if (session && typeof session.logout === 'function') {
+            try {
+                await session.logout();
+                setSession(null);
+            } catch (e) {
+                console.error("Logout failed", e);
+            }
         }
     };
 
@@ -67,7 +70,9 @@ export const WalletProvider = ({ children }) => {
             throw new Error("Cannot transact without a session");
         }
         try {
-            return await session.transact({ actions });
+            // The session object itself has the transact method
+            const result = await session.transact({ actions });
+            return result;
         } catch (e) {
             console.error("Transaction failed", e);
             throw e;
@@ -75,7 +80,7 @@ export const WalletProvider = ({ children }) => {
     };
 
     return (
-        <WalletContext.Provider value={{ session, auth, login, logout, transact }}>
+        <WalletContext.Provider value={{ session, login, logout, transact }}>
             {children}
         </WalletContext.Provider>
     );
