@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { WebAuth } from '@proton/web-sdk';
+import WebAuth from '@proton/web-sdk';
 
 // Create the context with a default shape
 const WalletContext = createContext({
