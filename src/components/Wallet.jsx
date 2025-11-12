@@ -5,7 +5,7 @@ import ProtonWebSDK from '@proton/web-sdk'; // Use the default import as a funct
 
 const WalletContext = createContext({
     session: null,
-    auth: null, // Keep auth for login/logout
+    link: null, // Need to store link for logout
     login: async () => {},
     logout: async () => {},
     transact: async (actions) => { throw new Error("Wallet not connected"); }
@@ -13,59 +13,75 @@ const WalletContext = createContext({
 
 export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
-    const [auth, setAuth] = useState(null);
+    const [link, setLink] = useState(null); // Store link for logout
 
-    // Effect for WebAuth initialization
+    // Effect for session restoration from localStorage and then live session
     useEffect(() => {
-        const initWebAuth = async () => {
+        const restoreSession = async () => {
             try {
-                const WebAuthModule = await import('@proton/web-sdk');
-                const WebAuth = WebAuthModule.default || WebAuthModule; 
-                const appName = '11dice';
-                const requestAccount = '11dice'; 
-                const newAuth = new WebAuth({ appName, requestAccount, chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace43922A9D974E' });
-                setAuth(newAuth);
+                const savedSession = localStorage.getItem('proton-session');
+                if (savedSession) {
+                    const parsedSession = JSON.parse(savedSession);
+                    // Attempt to restore a live session using the parsed data
+                    // The ProtonWebSDK function itself can restore a session if restoreSession: true is passed
+                    const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
+                        linkOptions: { endpoints: ['https://proton.greymass.com'] },
+                        transportOptions: { requestStatus: false },
+                        selectorOptions: {
+                            appName: '11dice',
+                            requestAccount: '11dice',
+                        },
+                        restoreSession: true, // Try to restore live session
+                    });
+
+                    if (restoredSession) {
+                        setSession(restoredSession);
+                        setLink(restoredLink);
+                        localStorage.setItem('proton-session', JSON.stringify(restoredSession)); // Update localStorage with live session
+                    } else {
+                        // If live session couldn't be restored, clear local storage
+                        localStorage.removeItem('proton-session');
+                        setSession(null);
+                        setLink(null);
+                    }
+                }
             } catch (e) {
-                console.error("WebAuth initialization failed", e);
+                console.error("Session restore failed", e);
+                localStorage.removeItem('proton-session'); // Clear on error
             }
         };
-        initWebAuth();
-    }, []);
-
-    // Effect for session restoration from localStorage
-    useEffect(() => {
-        if (auth) { // Only try to restore if WebAuth is initialized
-            const savedSession = localStorage.getItem('proton-session');
-            if (savedSession) {
-                try {
-                    const parsedSession = JSON.parse(savedSession);
-                    // It's better to use auth.restoreSession() if possible, but the user's snippet
-                    // directly uses the parsed session. Let's follow the snippet for now.
-                    setSession(parsedSession);
-                } catch (e) {
-                    console.error('Could not parse saved session:', e);
-                    localStorage.removeItem('proton-session');
-                }
-            }
-        }
-    }, [auth]); // Rerun when auth object is available
+        restoreSession();
+    }, []); // Run once on mount
 
     const login = async () => {
-        if (!auth) { console.error("Auth not initialized yet"); return; }
         try {
-            const newSession = await auth.login();
+            const { session: newSession, link: newLink } = await ProtonWebSDK({
+                linkOptions: { endpoints: ['https://proton.greymass.com'] },
+                transportOptions: { requestStatus: false },
+                selectorOptions: {
+                    appName: '11dice',
+                    appLogo: 'https://avatars.githubusercontent.com/u/6749354?s=200&v=4',
+                    requestAccount: '11dice',
+                },
+            });
             setSession(newSession);
+            setLink(newLink);
             localStorage.setItem('proton-session', JSON.stringify(newSession)); // Persist
-        } catch (e) { console.error("Login failed", e); }
+        } catch (e) {
+            console.error("Login failed", e);
+        }
     };
 
     const logout = async () => {
-        if (auth && session) { // Use auth to logout
+        if (link && session) {
             try {
-                await auth.logout(); // Use auth.logout()
+                await link.removeSession('11dice', session.auth, session.chainId);
                 localStorage.removeItem('proton-session'); // Clear persistence
                 setSession(null);
-            } catch (e) { console.error("Logout failed", e); }
+                setLink(null);
+            } catch (e) {
+                console.error("Logout failed", e);
+            }
         }
     };
 
@@ -74,7 +90,6 @@ export const WalletProvider = ({ children }) => {
             throw new Error("Cannot transact without a session");
         }
         try {
-            // The session object itself has the transact method
             const result = await session.transact({ actions });
             return result;
         } catch (e) {
@@ -84,7 +99,7 @@ export const WalletProvider = ({ children }) => {
     };
 
     return (
-        <WalletContext.Provider value={{ session, auth, login, logout, transact }}>
+        <WalletContext.Provider value={{ session, link, login, logout, transact }}>
             {children}
         </WalletContext.Provider>
     );
