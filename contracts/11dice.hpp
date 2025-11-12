@@ -20,6 +20,13 @@ public:
     void rolldice(name account);
 
     /**
+     * @brief Action to draw the winning number and distribute rewards.
+     * This action can only be called by the contract account itself.
+     */
+    [[eosio::action]]
+    void drawresult();
+
+    /**
      * @brief Notification handler for token transfers.
      * Used to detect payments and issue tickets.
      */

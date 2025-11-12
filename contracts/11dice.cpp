@@ -33,6 +33,65 @@ void onedice::rolldice(name account) {
     });
 }
 
+void onedice::drawresult() {
+    require_auth(get_self()); // Only the contract itself can call this action
+
+    // Generate winning roll using combined entropy
+    uint64_t seed = current_time_point().elapsed.count() + tapos_block_prefix();
+    uint8_t winning_roll = (static_cast<uint8_t>(seed % 6)) + 1;
+    print("WINNING_ROLL:", winning_roll);
+
+    // Calculate today's date range (UTC)
+    time_point_sec current_time = current_time_point();
+    uint32_t current_day_start_sec = current_time.sec_since_epoch() - (current_time.sec_since_epoch() % (24 * 60 * 60)); // Start of current UTC day
+    time_point_sec current_day_start(current_day_start_sec);
+    time_point_sec next_day_start(current_day_start_sec + (24 * 60 * 60));
+
+    roll_entries_table rolls(get_self(), get_self().value);
+    auto rolls_by_time = rolls.get_index<"bytime"_n>();
+
+    asset total_pot = asset(0, XPR_SYMBOL);
+    std::vector<name> winners; // Store winning player accounts (can have duplicates for multiple winning entries)
+
+    // Iterate through rolls for today
+    auto itr = rolls_by_time.lower_bound(current_day_start.sec_since_epoch());
+    while (itr != rolls_by_time.end() && itr->roll_time < next_day_start) {
+        total_pot += asset(TICKET_PRICE, XPR_SYMBOL); // Each roll costs one ticket
+        if (itr->roll_result == winning_roll) {
+            winners.push_back(itr->player_account);
+        }
+        itr++;
+    }
+
+    check(total_pot.amount > 0, "No rolls recorded for today. No payout.");
+    check(winners.size() > 0, "No winners for today's roll. No payout.");
+
+    // Calculate payout
+    double total_payout_amount = total_pot.amount * 0.9; // 90% payout
+    double payout_per_winner_entry = total_payout_amount / winners.size();
+
+    // Group winners to avoid multiple transfers to the same account if possible,
+    // or just iterate and send. For simplicity, we'll iterate and send for now.
+    // A more optimized approach would sum up payouts per unique winner.
+
+    // Distribute payouts
+    for (const auto& winner_account : winners) {
+        asset payout_quantity = asset(static_cast<int64_t>(payout_per_winner_entry), XPR_SYMBOL);
+        action(
+            permission_level{get_self(), "active"_n},
+            "eosio.token"_n,
+            "transfer"_n,
+            std::make_tuple(get_self(), winner_account, payout_quantity, std::string("11dice daily payout"))
+        ).send();
+    }
+
+    // Clear today's rolls after payout
+    itr = rolls_by_time.lower_bound(current_day_start.sec_since_epoch());
+    while (itr != rolls_by_time.end() && itr->roll_time < next_day_start) {
+        itr = rolls_by_time.erase(itr);
+    }
+}
+
 void onedice::on_transfer(name from, name to, asset quantity, std::string memo) {
     // If the transfer is not to this contract, ignore it
     if (to != get_self()) {
