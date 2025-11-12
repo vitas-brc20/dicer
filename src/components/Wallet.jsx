@@ -3,8 +3,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import WebAuth from '@proton/web-sdk';
 
-// Create the context with a default null value
-const WalletContext = createContext(null);
+// Create the context with a default shape
+const WalletContext = createContext({
+    session: null,
+    login: async () => {},
+    logout: async () => {},
+    transact: async (actions) => {}
+});
 
 // The provider component that will wrap our app
 export const WalletProvider = ({ children }) => {
