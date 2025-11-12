@@ -91,7 +91,7 @@ const GameInterface = () => {
             }]);
 
             // 3. Parse result and show dice roll
-            const logRollTrace = result.processed.action_traces.find(trace => trace.act.name === 'logroll');
+            const logRollTrace = result.processed.action_traces.find((trace: any) => trace.act.name === 'logroll');
             if (!logRollTrace) {
                 throw new Error('Could not find roll result in transaction.');
             }
