@@ -53,7 +53,7 @@ const GameInterface = () => {
                 account: 'eosio.token',
                 name: 'transfer',
                 authorization: [{ actor: session.auth.actor, permission: session.auth.permission }],
-                data: { from: session.auth.actor, to: '11dice', quantity: '11.0000 XPR', memo: 'buy 11dice ticket' },
+                data: { from: session.auth.actor, to: 'inchgame', quantity: '11.0000 XPR', memo: 'buy 11dice ticket' },
             }]);
             setStatus('Purchase successful! Refreshing balance...');
             await refreshBalance();
@@ -84,7 +84,7 @@ const GameInterface = () => {
             // 2. If time is valid, transact
             setStatus('Waiting for your signature...');
             const result = await transact([{
-                account: '11dice', // The contract account
+                account: 'inchgame', // The contract account
                 name: 'rolldice',
                 authorization: [{ actor: session.auth.actor, permission: session.auth.permission }],
                 data: { account: session.auth.actor },
