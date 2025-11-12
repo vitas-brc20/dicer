@@ -24,6 +24,7 @@ export const WalletProvider = ({ children }) => {
                     transportOptions: { requestStatus: false },
                     selectorOptions: {
                         appName: '11dice',
+                        requestAccount: 'inchgame',
                     },
                     restoreSession: true, // Rely on SDK to restore session
                 });
@@ -55,6 +56,7 @@ export const WalletProvider = ({ children }) => {
                 selectorOptions: {
                     appName: '11dice',
                     appLogo: 'https://avatars.githubusercontent.com/u/6749354?s=200&v=4',
+                    requestAccount: 'inchgame',
                 },
             });
             setSession(newSession);
