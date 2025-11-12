@@ -1,28 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import WebAuth, { Session } from '@proton/web-sdk';
-
-// Define the shape of our session context
-interface WalletContextType {
-    session: Session | null;
-    login: () => Promise<void>;
-    logout: () => Promise<void>;
-    transact: (actions: any[]) => Promise<any>;
-}
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import WebAuth from '@proton/web-sdk';
 
 // Create the context with a default null value
-const WalletContext = createContext<WalletContextType | null>(null);
-
-// Define the props for our provider component
-interface WalletProviderProps {
-    children: ReactNode;
-}
+const WalletContext = createContext(null);
 
 // The provider component that will wrap our app
-export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
-    const [session, setSession] = useState<Session | null>(null);
-    const [auth, setAuth] = useState<WebAuth | null>(null);
+export const WalletProvider = ({ children }) => {
+    const [session, setSession] = useState(null);
+    const [auth, setAuth] = useState(null);
+
 
     useEffect(() => {
         // Initialize WebAuth
@@ -37,7 +25,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
             try {
                 const restored = await auth.restoreSession();
                 if (restored) {
-                    setSession(restored as Session);
+                    setSession(restored);
                 }
             } catch (e) {
                 console.error("Session restore failed", e);
@@ -50,7 +38,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
         if (!auth) return;
         try {
             const newSession = await auth.login();
-            setSession(newSession as Session);
+            setSession(newSession);
         } catch (e) {
             console.error("Login failed", e);
         }
@@ -66,7 +54,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
         }
     };
 
-    const transact = async (actions: any[]) => {
+    const transact = async (actions) => {
         if (!session) {
             throw new Error("Cannot transact without a session");
         }

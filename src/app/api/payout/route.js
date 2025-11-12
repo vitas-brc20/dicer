@@ -25,10 +25,10 @@ const getKSTDayRange = () => {
 
 // --- Blockchain Connection ---
 const rpc = new JsonRpc(['https://proton.greymass.com']);
-const signatureProvider = new JsSignatureProvider([process.env.PAYOUT_PRIVATE_KEY!]);
+const signatureProvider = new JsSignatureProvider([process.env.PAYOUT_PRIVATE_KEY]);
 const api = new Api({ rpc, signatureProvider });
 
-export async function POST(request: Request) {
+export async function POST(request) {
     // 1. --- Security Check ---
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
         // 3. --- Determine Winner ---
         const winningRoll = Math.floor(Math.random() * 6) + 1;
-        const winners = rolls.filter((r: any) => r.roll === winningRoll);
+        const winners = rolls.filter(r => r.roll === winningRoll);
 
         if (winners.length === 0) {
             return NextResponse.json({ message: `Winning number was ${winningRoll}, but there were no winners.` });
@@ -72,15 +72,15 @@ export async function POST(request: Request) {
         const payoutAsset = `${payoutAmount} XPR`;
 
         // 5. --- Construct and Send Payout Transaction ---
-        const actions = winners.map((winner: any) => ({
+        const actions = winners.map(winner => ({
             account: 'eosio.token',
             name: 'transfer',
             authorization: [{
-                actor: process.env.PAYOUT_ACCOUNT_NAME!,
-                permission: process.env.PAYOUT_ACCOUNT_PERMISSION!,
+                actor: process.env.PAYOUT_ACCOUNT_NAME,
+                permission: process.env.PAYOUT_ACCOUNT_PERMISSION,
             }],
             data: {
-                from: process.env.PAYOUT_ACCOUNT_NAME!,
+                from: process.env.PAYOUT_ACCOUNT_NAME,
                 to: winner.actor,
                 quantity: payoutAsset,
                 memo: `Congratulations! You won the 11dice game for ${today}.`,
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
             winnerCount: winners.length,
             prizePool: `${prizePool.toFixed(4)} XPR`,
             individualPayout: payoutAsset,
-            transactionId: (result as any).transaction_id,
+            transactionId: result.transaction_id,
         });
 
     } catch (error) {

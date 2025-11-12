@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
+export async function GET(request) {
     // KST is UTC+9
     const now = new Date();
     const kstOffset = 9 * 60 * 60 * 1000;

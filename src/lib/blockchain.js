@@ -11,7 +11,7 @@ const CONTRACT_ACCOUNT = '11dice';
  * @param actor - The user's account name.
  * @returns The number of tickets the user has, or 0 if not found.
  */
-export const getTicketBalance = async (actor: string): Promise<number> => {
+export const getTicketBalance = async (actor) => {
     try {
         const result = await rpc.get_table_rows({
             json: true,

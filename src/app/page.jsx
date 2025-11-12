@@ -4,7 +4,7 @@ import { useWallet } from "@/components/Wallet";
 import { getTicketBalance } from "@/lib/blockchain";
 import { useEffect, useState } from "react";
 
-const Dice = ({ result }: { result: number | null }) => {
+const Dice = ({ result }) => {
     if (!result) return null;
     return (
         <div className="mt-4 p-4 border-2 border-dashed border-green-400 rounded-lg">
@@ -20,7 +20,7 @@ const GameInterface = () => {
     const [ticketBalance, setTicketBalance] = useState(0);
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState('');
-    const [diceResult, setDiceResult] = useState<number | null>(null);
+    const [diceResult, setDiceResult] = useState(null);
 
     const refreshBalance = async () => {
         if (!session?.actor) return;
@@ -91,7 +91,7 @@ const GameInterface = () => {
             }]);
 
             // 3. Parse result and show dice roll
-            const logRollTrace = result.processed.action_traces.find((trace: any) => trace.act.name === 'logroll');
+            const logRollTrace = result.processed.action_traces.find(trace => trace.act.name === 'logroll');
             if (!logRollTrace) {
                 throw new Error('Could not find roll result in transaction.');
             }
