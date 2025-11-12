@@ -22,19 +22,8 @@ void onedice::rolldice(name account) {
     // For a real-world application, a more robust oracle-based solution would be better.
     uint8_t dice_roll = (static_cast<uint8_t>(current_time_point().elapsed.count() % 6)) + 1;
 
-    // Log the result by calling the logroll action
-            action(
-                permission_level{get_self(), "eosio.code"_n},
-                get_self(),
-                "logroll"_n,
-                std::make_tuple(account, dice_roll)
-            ).send();}
-
-void onedice::logroll(name account, uint8_t roll) {
-    // This action requires the contract's own permission
-    require_auth(get_self());
-    // This action intentionally does nothing but create a trace in the transaction
-    // for off-chain services to easily read the dice roll result.
+    // The dice_roll result can be read by off-chain services directly from the transaction trace
+    // of the rolldice action itself. No need for a separate inline action.
 }
 
 void onedice::on_transfer(name from, name to, asset quantity, std::string memo) {

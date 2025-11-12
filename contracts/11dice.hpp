@@ -20,14 +20,6 @@ public:
     void rolldice(name account);
 
     /**
-     * @brief Logs the dice roll result. This is for external listeners.
-     * @param account - The account that rolled.
-     * @param roll - The dice roll result (1-6).
-     */
-    [[eosio::action]]
-    void logroll(name account, uint8_t roll);
-
-    /**
      * @brief Notification handler for token transfers.
      * Used to detect payments and issue tickets.
      */
