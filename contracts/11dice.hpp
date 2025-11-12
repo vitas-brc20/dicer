@@ -3,6 +3,7 @@
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include <eosio/system.hpp>
+#include <eosio/time.hpp>
 
 using namespace eosio;
 

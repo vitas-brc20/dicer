@@ -20,7 +20,7 @@ void onedice::rolldice(name account) {
 
     // Simple pseudo-random number generation based on block info
     // For a real-world application, a more robust oracle-based solution would be better.
-    uint8_t dice_roll = (tapos_block_num() % 6) + 1;
+    uint8_t dice_roll = (static_cast<uint8_t>(current_time_point().elapsed.count() % 6)) + 1;
 
     // Log the result by calling the logroll action
     action(
