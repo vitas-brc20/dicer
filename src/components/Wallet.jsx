@@ -29,6 +29,7 @@ export const WalletProvider = ({ children }) => {
 
                 if (restoredSession) {
                     setSession(restoredSession);
+                    console.log("Restored session:", restoredSession); // Debug log
                 }
             } catch (e) {
                 console.error("Session restore failed", e);
@@ -49,6 +50,7 @@ export const WalletProvider = ({ children }) => {
                 },
             });
             setSession(newSession);
+            console.log("New session after login:", newSession); // Debug log
         } catch (e) {
             console.error("Login failed", e);
         }
