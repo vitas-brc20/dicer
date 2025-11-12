@@ -5,7 +5,7 @@ import ProtonWebSDK from '@proton/web-sdk'; // Use the default import as a funct
 
 const WalletContext = createContext({
     session: null,
-    link: null, // Add link to context
+    auth: null, // Keep auth for login/logout
     login: async () => {},
     logout: async () => {},
     transact: async (actions) => { throw new Error("Wallet not connected"); }
@@ -13,62 +13,59 @@ const WalletContext = createContext({
 
 export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
-    const [link, setLink] = useState(null); // Add link to state
+    const [auth, setAuth] = useState(null);
 
-    // Effect for session restoration
+    // Effect for WebAuth initialization
     useEffect(() => {
-        const restore = async () => {
+        const initWebAuth = async () => {
             try {
-                const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({ // Destructure link
-                    linkOptions: { endpoints: ['https://proton.greymass.com'] },
-                    transportOptions: { requestStatus: false },
-                    selectorOptions: {
-                        appName: '11dice',
-                        requestAccount: '11dice',
-                    },
-                    restoreSession: true, // Explicitly try to restore session
-                });
-
-                if (restoredSession) {
-                    setSession(restoredSession);
-                    setLink(restoredLink); // Set link
-                    console.log("Restored session:", restoredSession); // Debug log
-                }
+                const WebAuthModule = await import('@proton/web-sdk');
+                const WebAuth = WebAuthModule.default || WebAuthModule; 
+                const appName = '11dice';
+                const requestAccount = '11dice'; 
+                const newAuth = new WebAuth({ appName, requestAccount, chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace43922A9D974E' });
+                setAuth(newAuth);
             } catch (e) {
-                console.error("Session restore failed", e);
+                console.error("WebAuth initialization failed", e);
             }
         };
-        restore();
+        initWebAuth();
     }, []);
 
-    const login = async () => {
-        try {
-            const { session: newSession, link: newLink } = await ProtonWebSDK({ // Destructure link
-                linkOptions: { endpoints: ['https://proton.greymass.com'] },
-                transportOptions: { requestStatus: false },
-                selectorOptions: {
-                    appName: '11dice',
-                    appLogo: 'https://avatars.githubusercontent.com/u/6749354?s=200&v=4', // Example logo from snippet
-                    requestAccount: '11dice',
-                },
-            });
-            setSession(newSession);
-            setLink(newLink); // Set link
-            console.log("New session after login:", newSession); // Debug log
-        } catch (e) {
-            console.error("Login failed", e);
+    // Effect for session restoration from localStorage
+    useEffect(() => {
+        if (auth) { // Only try to restore if WebAuth is initialized
+            const savedSession = localStorage.getItem('proton-session');
+            if (savedSession) {
+                try {
+                    const parsedSession = JSON.parse(savedSession);
+                    // It's better to use auth.restoreSession() if possible, but the user's snippet
+                    // directly uses the parsed session. Let's follow the snippet for now.
+                    setSession(parsedSession);
+                } catch (e) {
+                    console.error('Could not parse saved session:', e);
+                    localStorage.removeItem('proton-session');
+                }
+            }
         }
+    }, [auth]); // Rerun when auth object is available
+
+    const login = async () => {
+        if (!auth) { console.error("Auth not initialized yet"); return; }
+        try {
+            const newSession = await auth.login();
+            setSession(newSession);
+            localStorage.setItem('proton-session', JSON.stringify(newSession)); // Persist
+        } catch (e) { console.error("Login failed", e); }
     };
 
     const logout = async () => {
-        if (link && session) { // Check for link
+        if (auth && session) { // Use auth to logout
             try {
-                await link.removeSession('11dice', session.auth, session.chainId); // Use link.removeSession
+                await auth.logout(); // Use auth.logout()
+                localStorage.removeItem('proton-session'); // Clear persistence
                 setSession(null);
-                setLink(null); // Clear link
-            } catch (e) {
-                console.error("Logout failed", e);
-            }
+            } catch (e) { console.error("Logout failed", e); }
         }
     };
 
@@ -87,7 +84,7 @@ export const WalletProvider = ({ children }) => {
     };
 
     return (
-        <WalletContext.Provider value={{ session, link, login, logout, transact }}> {/* Include link in provider value */}
+        <WalletContext.Provider value={{ session, auth, login, logout, transact }}>
             {children}
         </WalletContext.Provider>
     );
