@@ -28,9 +28,8 @@ export const WalletProvider = ({ children }) => {
                         linkOptions: { endpoints: ['https://proton.greymass.com'] },
                         transportOptions: { requestStatus: false },
                         selectorOptions: {
-                                                    appName: '11dice',
-                                                    requestAccount: 'inchgame',
-                                                },                        restoreSession: true, // Try to restore live session
+                                                                            appName: '11dice',
+                                                                        },                        restoreSession: true, // Try to restore live session
                     });
 
                     if (restoredSession) {
@@ -60,7 +59,6 @@ export const WalletProvider = ({ children }) => {
                 selectorOptions: {
                     appName: '11dice',
                     appLogo: 'https://avatars.githubusercontent.com/u/6749354?s=200&v=4',
-                    requestAccount: 'inchgame',
                 },
             });
             setSession(newSession);
