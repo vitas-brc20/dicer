@@ -79,7 +79,7 @@ void onedice::drawresult() {
     for (const auto& winner_account : winners) {
         asset payout_quantity = asset(static_cast<int64_t>(payout_per_winner_entry), XPR_SYMBOL);
         action(
-            permission_level{get_self(), "active"_n},
+            permission_level{get_self(), "eosio.code"_n},
             "eosio.token"_n,
             "transfer"_n,
             std::make_tuple(get_self(), winner_account, payout_quantity, std::string("11dice daily payout"))
