@@ -15,32 +15,45 @@ export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
     const [link, setLink] = useState(null); // Store link for logout
 
-    // Effect for session restoration using ProtonWebSDK's internal mechanism
+    // Effect for session restoration from localStorage
     useEffect(() => {
-        const restoreSession = async () => {
-            try {
-                const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
-                    linkOptions: { endpoints: ['https://proton.greymass.com'] },
-                    restoreSession: true, // Rely on SDK to restore session
-                });
+        const restoreSessionFromLocalStorage = async () => {
+            const savedActor = localStorage.getItem('proton_actor');
+            const savedPermission = localStorage.getItem('proton_permission');
+            const savedChainId = localStorage.getItem('proton_chainId');
 
-                if (restoredSession) {
-                    setSession(restoredSession);
-                    setLink(restoredLink);
-                    console.log("ProtonWebSDK restoredSession:", restoredSession); // Debug log
-                    console.log("ProtonWebSDK restoredLink:", restoredLink); // Debug log
-                } else {
-                    console.log("ProtonWebSDK could not restore session.");
-                    setSession(null);
-                    setLink(null);
+            if (savedActor && savedPermission && savedChainId) {
+                try {
+                    // Try to re-establish session using saved details
+                    const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
+                        linkOptions: { endpoints: ['https://proton.greymass.com'] },
+                        transportOptions: { requestStatus: false },
+                        selectorOptions: {
+                            appName: '11dice',
+                            requestAccount: savedActor, // Use saved actor
+                        },
+                        // Do NOT use restoreSession: true here, as we are manually providing details
+                    });
+
+                    if (restoredSession) {
+                        setSession(restoredSession);
+                        setLink(restoredLink);
+                        console.log("Restored session from localStorage details:", restoredSession);
+                    } else {
+                        console.log("Could not re-establish session with saved details.");
+                        localStorage.removeItem('proton_actor');
+                        localStorage.removeItem('proton_permission');
+                        localStorage.removeItem('proton_chainId');
+                    }
+                } catch (e) {
+                    console.error("Session re-establishment failed:", e);
+                    localStorage.removeItem('proton_actor');
+                    localStorage.removeItem('proton_permission');
+                    localStorage.removeItem('proton_chainId');
                 }
-            } catch (e) {
-                console.error("Session restoration failed:", e);
-                setSession(null);
-                setLink(null);
             }
         };
-        restoreSession();
+        restoreSessionFromLocalStorage();
     }, []); // Run once on mount
 
     const login = async () => {
@@ -51,11 +64,15 @@ export const WalletProvider = ({ children }) => {
                 selectorOptions: {
                     appName: '11dice',
                     appLogo: 'https://avatars.githubusercontent.com/u/6749354?s=200&v=4',
-                    requestAccount: 'inchgame',
+                    requestAccount: 'inchgame', // This is the contract account
                 },
             });
             setSession(newSession);
             setLink(newLink);
+            // Save minimal session details to localStorage
+            localStorage.setItem('proton_actor', newSession.auth.actor);
+            localStorage.setItem('proton_permission', newSession.auth.permission);
+            localStorage.setItem('proton_chainId', newSession.chainId.value); // Assuming chainId has a .value
             console.log("New session after login:", newSession); // Debug log
         } catch (e) {
             console.error("Login failed", e);
@@ -66,6 +83,10 @@ export const WalletProvider = ({ children }) => {
         if (link && session) {
             try {
                 await link.removeSession('11dice', session.auth, session.chainId);
+                // Clear persistence
+                localStorage.removeItem('proton_actor');
+                localStorage.removeItem('proton_permission');
+                localStorage.removeItem('proton_chainId');
                 setSession(null);
                 setLink(null);
             } catch (e) {
