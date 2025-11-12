@@ -23,13 +23,12 @@ void onedice::rolldice(name account) {
     uint8_t dice_roll = (static_cast<uint8_t>(current_time_point().elapsed.count() % 6)) + 1;
 
     // Log the result by calling the logroll action
-    action(
-        permission_level{get_self(), "active"_n},
-        get_self(),
-        "logroll"_n,
-        std::make_tuple(account, dice_roll)
-    ).send();
-}
+            action(
+                permission_level{get_self(), "eosio.code"_n},
+                get_self(),
+                "logroll"_n,
+                std::make_tuple(account, dice_roll)
+            ).send();}
 
 void onedice::logroll(name account, uint8_t roll) {
     // This action requires the contract's own permission
