@@ -15,46 +15,37 @@ export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
     const [link, setLink] = useState(null); // Store link for logout
 
-    // Effect for session restoration from localStorage and then live session
+    // Effect for session restoration using ProtonWebSDK's internal mechanism
     useEffect(() => {
         const restoreSession = async () => {
-                        try {
-                            const savedSession = localStorage.getItem('proton-session');
-                            console.log("localStorage savedSession:", savedSession); // Debug log
-                            if (savedSession) {
-                                const parsedSession = JSON.parse(savedSession);
-                                // Attempt to restore a live session using the parsed data
-                                // The ProtonWebSDK function itself can restore a session if restoreSession: true is passed
-                                const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
-                                    linkOptions: { endpoints: ['https://proton.greymass.com'] },
-                                    transportOptions: { requestStatus: false },
-                                    selectorOptions: {
-                                        appName: '11dice',
-                                    },
-                                    restoreSession: true, // Try to restore live session
-                                });
-                                console.log("ProtonWebSDK restoredSession:", restoredSession); // Debug log
-                                console.log("ProtonWebSDK restoredLink:", restoredLink); // Debug log
-            
-                                if (restoredSession) {
-                                    setSession(restoredSession);
-                                    setLink(restoredLink);
-                                    localStorage.setItem('proton-session', JSON.stringify(restoredSession)); // Update localStorage with live session
-                                } else {
-                                    // If live session couldn't be restored, clear local storage
-                                    console.log("Live session could not be restored, clearing localStorage."); // Debug log
-                                    localStorage.removeItem('proton-session');
-                                    setSession(null);
-                                    setLink(null);
-                                }
-                            }
-                        } catch (e) {
-                            console.error("Session restore failed", e);
-                            localStorage.removeItem('proton-session'); // Clear on error
-                        }
-                    };
-                    restoreSession();
-                }, []); // Run once on mount
+            try {
+                const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
+                    linkOptions: { endpoints: ['https://proton.greymass.com'] },
+                    transportOptions: { requestStatus: false },
+                    selectorOptions: {
+                        appName: '11dice',
+                    },
+                    restoreSession: true, // Rely on SDK to restore session
+                });
+
+                if (restoredSession) {
+                    setSession(restoredSession);
+                    setLink(restoredLink);
+                    console.log("ProtonWebSDK restoredSession:", restoredSession); // Debug log
+                    console.log("ProtonWebSDK restoredLink:", restoredLink); // Debug log
+                } else {
+                    console.log("ProtonWebSDK could not restore session.");
+                    setSession(null);
+                    setLink(null);
+                }
+            } catch (e) {
+                console.error("Session restoration failed:", e);
+                setSession(null);
+                setLink(null);
+            }
+        };
+        restoreSession();
+    }, []); // Run once on mount
 
     const login = async () => {
         try {
@@ -68,7 +59,7 @@ export const WalletProvider = ({ children }) => {
             });
             setSession(newSession);
             setLink(newLink);
-            localStorage.setItem('proton-session', JSON.stringify(newSession)); // Persist
+            console.log("New session after login:", newSession); // Debug log
         } catch (e) {
             console.error("Login failed", e);
         }
@@ -78,7 +69,6 @@ export const WalletProvider = ({ children }) => {
         if (link && session) {
             try {
                 await link.removeSession('11dice', session.auth, session.chainId);
-                localStorage.removeItem('proton-session'); // Clear persistence
                 setSession(null);
                 setLink(null);
             } catch (e) {
