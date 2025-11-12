@@ -1,10 +1,9 @@
-"use client";
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import ProtonWebSDK from '@proton/web-sdk'; // Use the default import as a function
 
 const WalletContext = createContext({
     session: null,
+    link: null, // Add link to context
     login: async () => {},
     logout: async () => {},
     transact: async (actions) => { throw new Error("Wallet not connected"); }
@@ -12,12 +11,13 @@ const WalletContext = createContext({
 
 export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
+    const [link, setLink] = useState(null); // Add link to state
 
     // Effect for session restoration
     useEffect(() => {
         const restore = async () => {
             try {
-                const { session: restoredSession } = await ProtonWebSDK({
+                const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({ // Destructure link
                     linkOptions: { endpoints: ['https://proton.greymass.com'] },
                     transportOptions: { requestStatus: false },
                     selectorOptions: {
@@ -29,6 +29,7 @@ export const WalletProvider = ({ children }) => {
 
                 if (restoredSession) {
                     setSession(restoredSession);
+                    setLink(restoredLink); // Set link
                     console.log("Restored session:", restoredSession); // Debug log
                 }
             } catch (e) {
@@ -40,7 +41,7 @@ export const WalletProvider = ({ children }) => {
 
     const login = async () => {
         try {
-            const { session: newSession } = await ProtonWebSDK({
+            const { session: newSession, link: newLink } = await ProtonWebSDK({ // Destructure link
                 linkOptions: { endpoints: ['https://proton.greymass.com'] },
                 transportOptions: { requestStatus: false },
                 selectorOptions: {
@@ -50,6 +51,7 @@ export const WalletProvider = ({ children }) => {
                 },
             });
             setSession(newSession);
+            setLink(newLink); // Set link
             console.log("New session after login:", newSession); // Debug log
         } catch (e) {
             console.error("Login failed", e);
@@ -57,10 +59,11 @@ export const WalletProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        if (session && typeof session.logout === 'function') {
+        if (link && session) { // Check for link
             try {
-                await session.logout();
+                await link.removeSession('11dice', session.auth, session.chainId); // Use link.removeSession
                 setSession(null);
+                setLink(null); // Clear link
             } catch (e) {
                 console.error("Logout failed", e);
             }
@@ -82,7 +85,7 @@ export const WalletProvider = ({ children }) => {
     };
 
     return (
-        <WalletContext.Provider value={{ session, login, logout, transact }}>
+        <WalletContext.Provider value={{ session, link, login, logout, transact }}> {/* Include link in provider value */}
             {children}
         </WalletContext.Provider>
     );
