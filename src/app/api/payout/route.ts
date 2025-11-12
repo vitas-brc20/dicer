@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Api, JsonRpc, RpcError } from '@proton/js';
-import { JsSignatureProvider } from '@proton/js/dist/eosjs-jssig';
+import { Api, JsonRpc, RpcError, JsSignatureProvider } from '@proton/js';
 import { supabase } from '@/lib/supabase';
 
 // Helper function to get the start and end of the current day in KST

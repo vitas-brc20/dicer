@@ -1,7 +1,7 @@
-import { RPC } from '@proton/js';
+import { JsonRpc } from '@proton/js';
 
 // TODO: Replace with the actual RPC endpoint for the network you are using (e.g., Proton Mainnet, Testnet)
-const rpc = new RPC(['https://proton.greymass.com']); 
+const rpc = new JsonRpc(['https://proton.greymass.com']); 
 
 // TODO: Replace with your contract account name
 const CONTRACT_ACCOUNT = '11dice';
