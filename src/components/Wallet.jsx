@@ -30,7 +30,7 @@ export const WalletProvider = ({ children }) => {
                 try {
                     // Try to re-establish session using saved details
                     const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
-                        linkOptions: { endpoints: ['https://proton.greymass.com'] },
+                        linkOptions: { endpoints: ['https://proton.greymass.com'], chainId: savedChainId },
                         transportOptions: { requestStatus: false },
                         selectorOptions: {
                             appName: '11dice',
@@ -79,7 +79,7 @@ export const WalletProvider = ({ children }) => {
             // Save minimal session details to localStorage
             localStorage.setItem('proton_actor', newSession.auth.actor);
             localStorage.setItem('proton_permission', newSession.auth.permission);
-            localStorage.setItem('proton_chainId', newSession.chainId.value); // Assuming chainId has a .value
+            localStorage.setItem('proton_chainId', newSession.chainId.toString()); // Use toString() for ChainId object
             console.log("New session after login:", newSession); // Debug log
         } catch (e) {
             console.error("Login failed", e);
