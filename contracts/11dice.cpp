@@ -38,7 +38,7 @@ void onedice::drawresult() {
     require_auth(get_self()); // Only the contract itself can call this action
 
     // Generate winning roll using combined entropy
-    uint64_t seed = current_time_point().elapsed.count() + tapos_block_prefix();
+    uint64_t seed = current_time_point().elapsed.count() + current_block_time().elapsed.count();
     uint8_t winning_roll = (static_cast<uint8_t>(seed % 6)) + 1;
     print("WINNING_ROLL:", winning_roll);
 
