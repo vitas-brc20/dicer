@@ -16,49 +16,29 @@ export default function HistoryPage() {
     const [error, setError] = useState('');
     const [filterDate, setFilterDate] = useState(''); // For date filtering
 
-    const fetchRollHistory = async (actor, date = '') => {
+    const fetchRollHistory = async (actor) => { // Removed 'date' parameter as it's no longer used for filtering
         setLoading(true);
         setError('');
         try {
-            let lower_bound = '';
-            let upper_bound = '';
-            let index_position = '';
-            let key_type = '';
-
-            if (date) {
-                // Convert date string (YYYY-MM-DD) to Unix timestamp for filtering by time
-                const startOfDay = new Date(date + 'T00:00:00.000Z').getTime() / 1000;
-                const endOfDay = new Date(date + 'T23:59:59.999Z').getTime() / 1000;
-                
-                lower_bound = startOfDay.toString();
-                upper_bound = endOfDay.toString();
-                index_position = 'bytime';
-                key_type = 'i64';
-            } else {
-                // Query by player account
-                const actorName = new Name(actor);
-                lower_bound = actorName.value.toString();
-                upper_bound = actorName.value.toString(); // For exact match
-                index_position = 'byplayer';
-                key_type = 'i64';
-            }
-
-            const result = await rpc.get_table_rows({
+            // Always use the simplified query pattern for the logged-in player
+            const rpcParams = {
                 json: true,
                 code: CONTRACT_ACCOUNT,
                 scope: CONTRACT_ACCOUNT,
                 table: 'rollshist', // Query the historical rolls table
-                lower_bound: lower_bound,
-                upper_bound: upper_bound,
-                index_position: index_position,
-                key_type: key_type,
-                limit: 100, // Fetch up to 100 rolls
+                lower_bound: '', // As per user's working query
+                upper_bound: actor, // As per user's working query
+                index_position: 1, // As per user's working query (1 for byplayer)
+                key_type: '', // As per user's working query
+                limit: 100, // Fetch up to 100 rolls as requested
                 reverse: true, // Get most recent first
                 show_payer: false,
-            });
+            };
+            console.log("fetchRollHistory: RPC params:", rpcParams);
+            const result = await rpc.get_table_rows(rpcParams);
+            console.log("fetchRollHistory: RPC response:", result);
 
-            // Client-side filter is no longer strictly necessary if bounds are set correctly,
-            // but keeping it for robustness in case of scope issues or partial matches.
+            // Client-side filter is still necessary as the RPC query might return more than just the actor's rolls
             const filteredRolls = result.rows.filter(roll => roll.player_account === actor);
             setRollHistory(filteredRolls);
 
@@ -72,11 +52,12 @@ export default function HistoryPage() {
 
     useEffect(() => {
         if (session?.auth?.actor) {
-            fetchRollHistory(session.auth.actor, filterDate);
+            fetchRollHistory(session.auth.actor); // Removed filterDate from here
         }
-    }, [session, filterDate]);
+    }, [session]); // Removed filterDate from dependency array
 
     const handleDateChange = (e) => {
+        // Date filtering is no longer directly used for RPC, but can be kept for client-side display if needed
         setFilterDate(e.target.value);
     };
 
