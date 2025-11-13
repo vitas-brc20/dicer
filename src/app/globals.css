@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -21,8 +21,8 @@
 }
 
 body {
-  font-family: 'Press Start 2P', cursive;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   background: linear-gradient(135deg, var(--color-pastel-pink) 0%, var(--color-pastel-blue-light) 100%);
   background-attachment: fixed;
-  color: white; /* Default text color for contrast on dark elements */
+  color: var(--color-dark-text); /* Default text color from belo */
 }

@@ -9,7 +9,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        pixel: ['"Press Start 2P"', ...defaultTheme.fontFamily.sans],
+        sans: ['"M PLUS Rounded 1c"', ...defaultTheme.fontFamily.sans], // Use M PLUS Rounded 1c as default sans-serif
       },
       colors: {
         // Pastel Fantasy Palette inspired by "belo"
@@ -27,7 +27,7 @@ module.exports = {
         'accent-green': '#8AFF8A', // Bright accent for interactive elements
       },
       borderRadius: {
-        'xl': '22px', // Custom rounded-xl to be 22px
+        'xl': '8px', // Match belo's button border-radius
       }
     },
   },
