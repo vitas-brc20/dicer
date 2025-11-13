@@ -27,7 +27,7 @@ module.exports = {
         'accent-green': '#8AFF8A', // Bright accent for interactive elements
       },
       borderRadius: {
-        'xl': '8px', // Match belo's button border-radius
+        'xl': '22px', // Revert to 22px for prominent rounded corners
       }
     },
   },
