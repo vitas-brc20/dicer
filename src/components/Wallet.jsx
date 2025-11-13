@@ -40,9 +40,6 @@ export const WalletProvider = ({ children }) => {
                     const { session: restoredSession, link: restoredLink } = await withTimeout(
                         ProtonWebSDK({
                             linkOptions: { endpoints: ['https://proton.greymass.com'], chainId: savedChainId },
-                            selectorOptions: {
-                                appName: '11dice',
-                            },
                             restoreSession: true, // Use SDK's restore mechanism
                         }),
                         5000 // 5 seconds timeout
