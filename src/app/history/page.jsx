@@ -98,10 +98,10 @@ export default function HistoryPage() {
             ) : (
                 <div className="w-full max-w-2xl space-y-4">
                     {rollHistory.map((roll) => (
-                        <div key={roll.id} className="bg-dark-card p-5 rounded-xl shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center border-2 border-pastel-green hover:border-accent-green transition-colors duration-200">
+                        <div key={roll.id} className="bg-pastel-blue-light text-dark-text p-5 rounded-xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center border-2 border-pastel-green hover:border-accent-green transition-colors duration-200">
                             <div>
                                 <p className="text-xl">Roll: <span className="text-accent-green">{roll.roll_result}</span></p>
-                                <p className="text-sm text-gray-400">Time: {new Date(roll.roll_time + 'Z').toLocaleString()}</p>
+                                <p className="text-sm text-gray-700">Time: {new Date(roll.roll_time + 'Z').toLocaleString()}</p>
                             </div>
                             <p className="text-sm text-pastel-blue-dark mt-2 sm:mt-0">Roll ID: {roll.id}</p>
                         </div>
