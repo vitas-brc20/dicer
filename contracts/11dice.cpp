@@ -51,6 +51,7 @@ void onedice::drawresult() {
     // Generate a winning roll using a more robust pseudo-random number generation
     uint64_t seed = current_time_point().elapsed.count() + current_block_time().to_time_point().elapsed.count();
     uint8_t winning_roll = generate_random_number(seed);
+    time_point_sec draw_time = current_time_point(); // Re-declare draw_time
     print("WINNING_ROLL:", winning_roll);
 
     // Calculate today's date range (UTC)
