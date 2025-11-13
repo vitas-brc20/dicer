@@ -49,7 +49,7 @@ export const getLatestRoll = async (actor) => {
             table: 'rolls',
             lower_bound: new Name(actor).value.toString(), // Convert name to uint64_t string
             upper_bound: new Name(actor).value.toString(), // Convert name to uint64_t string
-            index_position: 'byplayer', // Use the secondary index for player account
+            index_position: '1', // Use the first secondary index (byplayer)
             key_type: 'i64', // Correct key type for uint64_t
             limit: 1,
             reverse: true, // Get the latest roll
