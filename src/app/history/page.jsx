@@ -4,6 +4,7 @@ import { useWallet } from "@/components/Wallet";
 import { JsonRpc } from '@proton/js';
 import { useEffect, useState } from "react";
 import Link from "next/link"; // Import Link for navigation
+import { Name } from '@greymass/eosio'; // Import Name for account name conversion
 
 const rpc = new JsonRpc(['https://proton.greymass.com']);
 const CONTRACT_ACCOUNT = 'inchgame';
@@ -21,6 +22,8 @@ export default function HistoryPage() {
         try {
             let lower_bound = '';
             let upper_bound = '';
+            let index_position = '';
+            let key_type = '';
 
             if (date) {
                 // Convert date string (YYYY-MM-DD) to Unix timestamp for filtering by time
@@ -29,6 +32,15 @@ export default function HistoryPage() {
                 
                 lower_bound = startOfDay.toString();
                 upper_bound = endOfDay.toString();
+                index_position = 'bytime';
+                key_type = 'i64';
+            } else {
+                // Query by player account
+                const actorName = new Name(actor);
+                lower_bound = actorName.value.toString();
+                upper_bound = actorName.value.toString(); // For exact match
+                index_position = 'byplayer';
+                key_type = 'i64';
             }
 
             const result = await rpc.get_table_rows({
@@ -36,23 +48,23 @@ export default function HistoryPage() {
                 code: CONTRACT_ACCOUNT,
                 scope: CONTRACT_ACCOUNT,
                 table: 'rollshist', // Query the historical rolls table
-                lower_bound: date ? lower_bound : undefined, // Filter by date if provided
-                upper_bound: date ? upper_bound : undefined,
-                index_position: date ? 'bytime' : 'byplayer', // Use bytime index for date filter, byplayer otherwise
-                key_type: date ? 'i64' : 'i64', // Both bytime and byplayer use i64
+                lower_bound: lower_bound,
+                upper_bound: upper_bound,
+                index_position: index_position,
+                key_type: key_type,
                 limit: 100, // Fetch up to 100 rolls
                 reverse: true, // Get most recent first
                 show_payer: false,
             });
 
-            // Filter by actor on the client side if not filtering by date
-            // Or if filtering by date, ensure the actor matches
+            // Client-side filter is no longer strictly necessary if bounds are set correctly,
+            // but keeping it for robustness in case of scope issues or partial matches.
             const filteredRolls = result.rows.filter(roll => roll.player_account === actor);
             setRollHistory(filteredRolls);
 
         } catch (e) {
             console.error("Error fetching roll history:", e);
-            setError('Failed to fetch roll history.');
+            setError(`Failed to fetch roll history: ${e.message || e}`);
         } finally {
             setLoading(false);
         }
