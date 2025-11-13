@@ -1,4 +1,5 @@
-import { JsonRpc, Name } from '@proton/js';
+import { JsonRpc } from '@proton/js';
+import { Name } from '@greymass/eosio';
 
 // TODO: Replace with the actual RPC endpoint for the network you are using (e.g., Proton Mainnet, Testnet)
 const rpc = new JsonRpc(['https://proton.greymass.com']); 
