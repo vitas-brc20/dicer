@@ -85,7 +85,7 @@ export default function HistoryPage() {
             <main className="flex min-h-screen flex-col items-center justify-center p-12 bg-dark-bg text-white">
                 <p className="text-xl text-pastel-blue-dark font-pixel mb-6">Please connect your wallet to view roll history.</p>
                 <Link href="/" passHref>
-                    <button className="px-8 py-4 bg-pastel-green text-dark-text text-xl font-bold rounded-xl shadow-lg hover:bg-accent-green transform hover:scale-105 transition-all duration-200 ease-in-out border-4 border-pastel-green hover:border-accent-green font-pixel">
+                    <button className="px-8 py-4 bg-pastel-green text-dark-text text-xl font-bold rounded-xl shadow-xl hover:bg-accent-green transform hover:scale-105 transition-all duration-200 ease-in-out active:translate-y-0.5 border-4 border-pastel-green hover:border-accent-green font-pixel">
                         Connect Wallet
                     </button>
                 </Link>
@@ -104,7 +104,7 @@ export default function HistoryPage() {
                     id="filterDate" 
                     value={filterDate} 
                     onChange={handleDateChange}
-                    className="p-3 rounded-xl bg-dark-bg text-white border-2 border-pastel-purple focus:ring-2 focus:ring-accent-blue focus:border-transparent outline-none font-pixel"
+                    className="p-3 rounded-xl bg-dark-bg text-white border-2 border-pastel-purple focus:ring-2 focus:ring-accent-blue focus:border-transparent outline-none font-pixel shadow-md"
                 />
             </div>
 
@@ -128,7 +128,7 @@ export default function HistoryPage() {
                 </div>
             )}
             <Link href="/" passHref>
-                <button className="mt-10 px-8 py-4 bg-pastel-blue-dark text-dark-text text-xl font-bold rounded-xl shadow-lg hover:bg-accent-blue transition-all duration-200 ease-in-out border-4 border-pastel-blue-dark hover:border-accent-blue font-pixel">
+                <button className="mt-10 px-8 py-4 bg-pastel-blue-dark text-dark-text text-xl font-bold rounded-xl shadow-xl hover:bg-accent-blue transition-all duration-200 ease-in-out active:translate-y-0.5 border-4 border-pastel-blue-dark hover:border-accent-blue font-pixel">
                     Back to Game
                 </button>
             </Link>
