@@ -101,7 +101,7 @@ void onedice::drawresult() {
 
     // Store the winning roll for transparency
     winning_rolls_table winrolls(get_self(), get_self().value);
-    winrolls.emplace(get_self(), [&](auto& row) {
+    winrolls.emplace(get_self(), [draw_time, &](auto& row) { // Explicitly capture draw_time
         row.id = draw_time.sec_since_epoch();
         row.winning_roll = winning_roll;
         row.draw_time = draw_time;
