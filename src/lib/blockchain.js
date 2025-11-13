@@ -1,4 +1,4 @@
-import { JsonRpc, name } from '@proton/js';
+import { JsonRpc, Name } from '@proton/js';
 
 // TODO: Replace with the actual RPC endpoint for the network you are using (e.g., Proton Mainnet, Testnet)
 const rpc = new JsonRpc(['https://proton.greymass.com']); 
@@ -46,8 +46,8 @@ export const getLatestRoll = async (actor) => {
             code: CONTRACT_ACCOUNT,
             scope: CONTRACT_ACCOUNT,
             table: 'rolls',
-            lower_bound: name(actor).value.toString(), // Convert name to uint64_t string
-            upper_bound: name(actor).value.toString(), // Convert name to uint64_t string
+            lower_bound: new Name(actor).value.toString(), // Convert name to uint64_t string
+            upper_bound: new Name(actor).value.toString(), // Convert name to uint64_t string
             index_position: 'byplayer', // Use the secondary index for player account
             key_type: 'i64', // Correct key type for uint64_t
             limit: 1,
