@@ -4,10 +4,16 @@ import { useWallet } from "@/components/Wallet";
 import { getTicketBalance, getLatestRoll } from "@/lib/blockchain";
 import { useEffect, useState } from "react";
 
-const Dice = ({ result }) => {
-
-
-    if (!result) return null;
+const Dice = ({ result, rolling }) => {
+    if (rolling) {
+        return (
+            <div className="mt-4 p-4 border-2 border-dashed border-blue-400 rounded-lg">
+                <p className="text-xl">Rolling...</p>
+                <p className="text-6xl font-bold text-blue-400 animate-spin">🎲</p>
+            </div>
+        );
+    }
+    if (result === null) return null; // Only show if not rolling and result is available
     return (
         <div className="mt-4 p-4 border-2 border-dashed border-green-400 rounded-lg">
             <p className="text-xl">You rolled:</p>
@@ -23,6 +29,7 @@ const GameInterface = () => {
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState('');
     const [diceResult, setDiceResult] = useState(null);
+    const [isRolling, setIsRolling] = useState(false); // New state for rolling animation
 
     const refreshBalance = async () => {
         console.log("refreshBalance called. session.auth.actor:", session?.auth?.actor);
@@ -81,6 +88,7 @@ const GameInterface = () => {
         if (!session) return;
         setLoading(true);
         setDiceResult(null);
+        setIsRolling(true); // Start rolling animation
         setStatus('Checking game time...');
 
         try {
@@ -118,7 +126,9 @@ const GameInterface = () => {
             } else {
                 setStatus(`Roll failed: An unknown error occurred.`);
             }
+        } finally {
             setLoading(false);
+            setIsRolling(false); // Stop rolling animation
         }
     };
 
@@ -161,7 +171,7 @@ const GameInterface = () => {
             <div className="my-8 p-6 border rounded-lg border-gray-600 min-h-[150px] flex items-center justify-center">
                 {renderGameControls()}
             </div>
-            <Dice result={diceResult} />
+            <Dice result={diceResult} rolling={isRolling} />
             <button
                 onClick={logout}
                 className="mt-8 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
