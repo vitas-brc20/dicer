@@ -16,7 +16,7 @@ export default function HistoryPage() {
     const [error, setError] = useState('');
     const [filterDate, setFilterDate] = useState(''); // For date filtering
 
-    const fetchRollHistory = async (actor) => { // Removed 'date' parameter as it's no longer used for filtering
+    const fetchRollHistory = async (actor) => { // Fetch roll history for the given actor
         setLoading(true);
         setError('');
         try {
