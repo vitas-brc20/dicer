@@ -70,10 +70,10 @@ export default function HistoryPage() {
 
     if (!session) {
         return (
-            <main className="flex min-h-screen flex-col items-center justify-center p-12 bg-gray-900 text-white">
-                <p className="text-xl text-gray-300">Please connect your wallet to view roll history.</p>
+            <main className="flex min-h-screen flex-col items-center justify-center p-12 bg-dark-bg text-white">
+                <p className="text-xl text-pastel-blue-dark font-pixel mb-6">Please connect your wallet to view roll history.</p>
                 <Link href="/" passHref>
-                    <button className="mt-6 px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 ease-in-out">
+                    <button className="px-8 py-4 bg-pastel-green text-dark-text text-xl font-bold rounded-xl shadow-lg hover:bg-accent-green transform hover:scale-105 transition-all duration-200 ease-in-out border-4 border-pastel-green hover:border-accent-green font-pixel">
                         Connect Wallet
                     </button>
                 </Link>
@@ -82,41 +82,41 @@ export default function HistoryPage() {
     }
 
     return (
-        <main className="flex min-h-screen flex-col items-center p-12 bg-gray-900 text-white">
-            <h1 className="text-5xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-blue-500 text-transparent bg-clip-text">Your Roll History</h1>
+        <main className="flex min-h-screen flex-col items-center p-12 bg-dark-bg text-white">
+            <h1 className="text-5xl font-bold mb-8 bg-gradient-to-r from-pastel-purple to-pastel-blue-dark text-transparent bg-clip-text font-pixel">Your Roll History</h1>
             
-            <div className="mb-8 p-4 bg-gray-800 rounded-lg shadow-lg flex items-center space-x-4">
-                <label htmlFor="filterDate" className="text-lg text-gray-300">Filter by Date:</label>
+            <div className="mb-8 p-4 bg-dark-card rounded-xl shadow-lg flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 border-2 border-pastel-blue-dark">
+                <label htmlFor="filterDate" className="text-lg text-pastel-blue-dark font-pixel">Filter by Date:</label>
                 <input 
                     type="date" 
                     id="filterDate" 
                     value={filterDate} 
                     onChange={handleDateChange}
-                    className="p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    className="p-3 rounded-xl bg-dark-bg text-white border-2 border-pastel-purple focus:ring-2 focus:ring-accent-blue focus:border-transparent outline-none font-pixel"
                 />
             </div>
 
             {loading ? (
-                <p className="text-xl text-gray-300">Loading roll history...</p>
+                <p className="text-xl text-pastel-blue-dark font-pixel">Loading roll history...</p>
             ) : error ? (
-                <p className="text-xl text-red-500">{error}</p>
+                <p className="text-xl text-pastel-pink font-pixel">{error}</p>
             ) : rollHistory.length === 0 ? (
-                <p className="text-xl text-gray-300">No roll history found for <span className="font-bold text-blue-400">{session.auth.actor}</span> {filterDate ? `on ${filterDate}` : ''}.</p>
+                <p className="text-xl text-pastel-yellow font-pixel">No roll history found for <span className="font-bold text-accent-green">{session.auth.actor}</span> {filterDate ? `on ${filterDate}` : ''}.</p>
             ) : (
                 <div className="w-full max-w-2xl space-y-4">
                     {rollHistory.map((roll) => (
-                        <div key={roll.id} className="bg-gray-800 p-5 rounded-lg shadow-md flex justify-between items-center border border-gray-700 hover:border-blue-500 transition-colors duration-200">
+                        <div key={roll.id} className="bg-dark-card p-5 rounded-xl shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center border-2 border-pastel-green hover:border-accent-green transition-colors duration-200">
                             <div>
-                                <p className="text-xl font-semibold">Roll: <span className="text-yellow-400">{roll.roll_result}</span></p>
-                                <p className="text-sm text-gray-400">Time: {new Date(roll.roll_time + 'Z').toLocaleString()}</p>
+                                <p className="text-xl font-pixel">Roll: <span className="text-accent-green">{roll.roll_result}</span></p>
+                                <p className="text-sm text-gray-400 font-pixel">Time: {new Date(roll.roll_time + 'Z').toLocaleString()}</p>
                             </div>
-                            <p className="text-sm text-gray-500">Roll ID: {roll.id}</p>
+                            <p className="text-sm text-pastel-blue-dark font-pixel mt-2 sm:mt-0">Roll ID: {roll.id}</p>
                         </div>
                     ))}
                 </div>
             )}
             <Link href="/" passHref>
-                <button className="mt-10 px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 ease-in-out">
+                <button className="mt-10 px-8 py-4 bg-pastel-blue-dark text-dark-text text-xl font-bold rounded-xl shadow-lg hover:bg-accent-blue transition-all duration-200 ease-in-out border-4 border-pastel-blue-dark hover:border-accent-blue font-pixel">
                     Back to Game
                 </button>
             </Link>

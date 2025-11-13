@@ -6,18 +6,23 @@
 
 :root {
   /* Pastel Fantasy Palette */
-  --color-pastel-blue: #A7C7E7;
+  --color-pastel-pink: #FFD1DC;
+  --color-pastel-blue-light: #B0E0E6;
+  --color-pastel-blue-dark: #A7C7E7;
   --color-pastel-green: #B2D8B2;
-  --color-pastel-pink: #FFB6C1;
   --color-pastel-yellow: #FDFD96;
   --color-pastel-purple: #B19CD9;
-  --color-dark-bg: #282c34;
-  --color-dark-card: #3a3f47;
-  --color-accent-light: #8AFF8A;
-  --color-accent-dark: #4CAF50;
+  --color-dark-text: #213547;
+  --color-dark-bg: #1a1a1a;
+  --color-dark-card: #2d2d2d;
+  --color-accent-blue: #646cff;
+  --color-accent-blue-hover: #535bf2;
+  --color-accent-green: #8AFF8A;
 }
 
 body {
   font-family: 'Press Start 2P', cursive;
-  background-color: var(--color-dark-bg);
+  background: linear-gradient(135deg, var(--color-pastel-pink) 0%, var(--color-pastel-blue-light) 100%);
+  background-attachment: fixed;
+  color: white; /* Default text color for contrast on dark elements */
 }
