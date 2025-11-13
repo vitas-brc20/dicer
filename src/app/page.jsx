@@ -179,6 +179,12 @@ const GameInterface = () => {
             >
                 Logout
             </button>
+            <a
+                href="/history"
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors inline-block"
+            >
+                View Roll History
+            </a>
         </div>
     );
 };
