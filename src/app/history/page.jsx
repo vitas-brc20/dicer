@@ -3,6 +3,7 @@
 import { useWallet } from "@/components/Wallet";
 import { JsonRpc } from '@proton/js';
 import { useEffect, useState } from "react";
+import Link from "next/link"; // Import Link for navigation
 
 const rpc = new JsonRpc(['https://proton.greymass.com']);
 const CONTRACT_ACCOUNT = 'inchgame';
@@ -70,45 +71,55 @@ export default function HistoryPage() {
     if (!session) {
         return (
             <main className="flex min-h-screen flex-col items-center justify-center p-12 bg-gray-900 text-white">
-                <p className="text-xl">Please connect your wallet to view roll history.</p>
+                <p className="text-xl text-gray-300">Please connect your wallet to view roll history.</p>
+                <Link href="/" passHref>
+                    <button className="mt-6 px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 ease-in-out">
+                        Connect Wallet
+                    </button>
+                </Link>
             </main>
         );
     }
 
     return (
         <main className="flex min-h-screen flex-col items-center p-12 bg-gray-900 text-white">
-            <h1 className="text-4xl font-bold mb-8">Your Roll History</h1>
+            <h1 className="text-5xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-blue-500 text-transparent bg-clip-text">Your Roll History</h1>
             
-            <div className="mb-6">
-                <label htmlFor="filterDate" className="mr-2 text-lg">Filter by Date:</label>
+            <div className="mb-8 p-4 bg-gray-800 rounded-lg shadow-lg flex items-center space-x-4">
+                <label htmlFor="filterDate" className="text-lg text-gray-300">Filter by Date:</label>
                 <input 
                     type="date" 
                     id="filterDate" 
                     value={filterDate} 
                     onChange={handleDateChange}
-                    className="p-2 rounded-md bg-gray-800 text-white border border-gray-700"
+                    className="p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 />
             </div>
 
             {loading ? (
-                <p className="text-xl">Loading roll history...</p>
+                <p className="text-xl text-gray-300">Loading roll history...</p>
             ) : error ? (
                 <p className="text-xl text-red-500">{error}</p>
             ) : rollHistory.length === 0 ? (
-                <p className="text-xl">No roll history found for {session.auth.actor} {filterDate ? `on ${filterDate}` : ''}.</p>
+                <p className="text-xl text-gray-300">No roll history found for <span className="font-bold text-blue-400">{session.auth.actor}</span> {filterDate ? `on ${filterDate}` : ''}.</p>
             ) : (
-                <div className="w-full max-w-2xl">
+                <div className="w-full max-w-2xl space-y-4">
                     {rollHistory.map((roll) => (
-                        <div key={roll.id} className="bg-gray-800 p-4 rounded-lg mb-4 flex justify-between items-center">
+                        <div key={roll.id} className="bg-gray-800 p-5 rounded-lg shadow-md flex justify-between items-center border border-gray-700 hover:border-blue-500 transition-colors duration-200">
                             <div>
-                                <p className="text-lg font-semibold">Roll: <span className="text-yellow-400">{roll.roll_result}</span></p>
+                                <p className="text-xl font-semibold">Roll: <span className="text-yellow-400">{roll.roll_result}</span></p>
                                 <p className="text-sm text-gray-400">Time: {new Date(roll.roll_time + 'Z').toLocaleString()}</p>
                             </div>
-                            <p className="text-sm text-gray-500">ID: {roll.id}</p>
+                            <p className="text-sm text-gray-500">Roll ID: {roll.id}</p>
                         </div>
                     ))}
                 </div>
             )}
+            <Link href="/" passHref>
+                <button className="mt-10 px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 ease-in-out">
+                    Back to Game
+                </button>
+            </Link>
         </main>
     );
 }

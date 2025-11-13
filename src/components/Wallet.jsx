@@ -11,17 +11,10 @@ const WalletContext = createContext({
     transact: async (actions) => { throw new Error("Wallet not connected"); }
 });
 
-// Helper function for timeout
-function withTimeout(promise, ms) {
-    return Promise.race([
-        promise,
-        new Promise((resolve, reject) => setTimeout(() => reject(new Error('ProtonWebSDK timeout')), ms))
-    ]);
-}
-
 export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
     const [link, setLink] = useState(null); // Store link for logout
+    const appName = '11dice'; // Define appName here
 
     // Effect for session restoration from localStorage
     useEffect(() => {
@@ -36,23 +29,33 @@ export const WalletProvider = ({ children }) => {
                 console.log("  savedPermission:", savedPermission);
                 console.log("  savedChainId from localStorage:", savedChainId);
                 try {
-                    // Try to re-establish session using saved details with a timeout
-                    const { session: restoredSession, link: restoredLink } = await withTimeout(
-                        ProtonWebSDK({
-                            linkOptions: { endpoints: ['https://proton.greymass.com'], chainId: savedChainId },
-                            restoreSession: true, // Use SDK's restore mechanism
-                        }),
-                        5000 // 5 seconds timeout
-                    );
+                    // First, initialize ProtonWebSDK to get the link object
+                    const { link: newLink } = await ProtonWebSDK({
+                        linkOptions: { endpoints: ['https://proton.greymass.com'], chainId: savedChainId },
+                        selectorOptions: {
+                            appName: appName,
+                        },
+                    });
 
-                    if (restoredSession) {
-                        setSession(restoredSession);
-                        setLink(restoredLink);
-                        console.log("Restored session from localStorage details:", restoredSession);
-                        console.log("Restored link from localStorage details:", restoredLink);
+                    if (newLink) {
+                        // Then, try to restore the session using the link object
+                        const restoredSession = await newLink.restoreSession(appName, {
+                            actor: savedActor,
+                            permission: savedPermission,
+                        }, savedChainId);
+
+                        if (restoredSession) {
+                            setSession(restoredSession);
+                            setLink(newLink); // Set the link object
+                            console.log("Restored session from link.restoreSession:", restoredSession);
+                        } else {
+                            console.log("link.restoreSession returned null. Could not re-establish session.");
+                            localStorage.removeItem('proton_actor');
+                            localStorage.removeItem('proton_permission');
+                            localStorage.removeItem('proton_chainId');
+                        }
                     } else {
-                        console.log("ProtonWebSDK returned null for restoredSession.");
-                        console.log("Could not re-establish session with saved details (ProtonWebSDK returned null).");
+                        console.log("ProtonWebSDK initialization returned null link.");
                         localStorage.removeItem('proton_actor');
                         localStorage.removeItem('proton_permission');
                         localStorage.removeItem('proton_chainId');
@@ -76,7 +79,7 @@ export const WalletProvider = ({ children }) => {
                 linkOptions: { endpoints: ['https://proton.greymass.com'] },
                 transportOptions: { requestStatus: false },
                 selectorOptions: {
-                    appName: '11dice',
+                    appName: appName,
                     appLogo: 'https://avatars.githubusercontent.com/u/6749354?s=200&v=4',
                     requestAccount: 'inchgame', // This is the contract account
                 },

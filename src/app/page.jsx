@@ -3,33 +3,33 @@
 import { useWallet } from "@/components/Wallet";
 import { getTicketBalance, getLatestRoll } from "@/lib/blockchain";
 import { useEffect, useState } from "react";
+import Link from "next/link"; // Import Link for navigation
 
 const Dice = ({ result, rolling }) => {
     if (rolling) {
         return (
-            <div className="mt-4 p-4 border-2 border-dashed border-blue-400 rounded-lg">
-                <p className="text-xl">Rolling...</p>
-                <p className="text-6xl font-bold text-blue-400 animate-spin">🎲</p>
+            <div className="mt-4 p-4 bg-gray-800 rounded-lg shadow-lg flex flex-col items-center justify-center min-h-[150px]">
+                <p className="text-xl text-gray-300">Rolling...</p>
+                <p className="text-7xl font-bold text-blue-400 animate-bounce">🎲</p>
             </div>
         );
     }
-    if (result === null) return null; // Only show if not rolling and result is available
+    if (result === null) return null;
     return (
-        <div className="mt-4 p-4 border-2 border-dashed border-green-400 rounded-lg">
-            <p className="text-xl">You rolled:</p>
-            <p className="text-6xl font-bold text-green-400">{result}</p>
+        <div className="mt-4 p-4 bg-gray-800 rounded-lg shadow-lg flex flex-col items-center justify-center min-h-[150px]">
+            <p className="text-xl text-gray-300">You rolled:</p>
+            <p className="text-7xl font-bold text-green-400">{result}</p>
         </div>
     )
 }
 
-// A component to show the main game UI
 const GameInterface = () => {
     const { session, logout, transact } = useWallet();
     const [ticketBalance, setTicketBalance] = useState(0);
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState('');
     const [diceResult, setDiceResult] = useState(null);
-    const [isRolling, setIsRolling] = useState(false); // New state for rolling animation
+    const [isRolling, setIsRolling] = useState(false);
 
     const refreshBalance = async () => {
         console.log("refreshBalance called. session.auth.actor:", session?.auth?.actor);
@@ -77,7 +77,8 @@ const GameInterface = () => {
         } catch (e) {
             if (e instanceof Error) {
                 setStatus(`Purchase failed: ${e.message}`);
-            } else {
+            }
+            else {
                 setStatus(`Purchase failed: An unknown error occurred.`);
             }
             setLoading(false);
@@ -88,27 +89,24 @@ const GameInterface = () => {
         if (!session) return;
         setLoading(true);
         setDiceResult(null);
-        setIsRolling(true); // Start rolling animation
+        setIsRolling(true);
         setStatus('Checking game time...');
 
         try {
-            // 1. Check if it's a valid time to roll
             const timeCheck = await fetch('/api/roll');
             if (!timeCheck.ok) {
                 const { error } = await timeCheck.json();
                 throw new Error(error);
             }
 
-            // 2. If time is valid, transact
             setStatus('Waiting for your signature...');
             const result = await transact([{
-                account: 'inchgame', // The contract account
+                account: 'inchgame',
                 name: 'rolldice',
                 authorization: [{ actor: session.auth.actor, permission: session.auth.permission }],
                 data: { account: session.auth.actor },
             }]);
 
-            // 3. Get dice roll from the smart contract table
             setStatus('Roll successful! Fetching result...');
             const roll = await getLatestRoll(session.auth.actor);
             if (roll === null) {
@@ -117,45 +115,45 @@ const GameInterface = () => {
             setDiceResult(roll);
             setStatus('Roll recorded! Refreshing balance...');
 
-            // 4. Refresh balance
             await refreshBalance();
 
         } catch (e) {
             if (e instanceof Error) {
                 setStatus(`Roll failed: ${e.message}`);
-            } else {
+            }
+            else {
                 setStatus(`Roll failed: An unknown error occurred.`);
             }
-            setStatus(''); // Clear status message after displaying error
+            setStatus('');
         } finally {
             setLoading(false);
-            setIsRolling(false); // Stop rolling animation
+            setIsRolling(false);
         }
     };
 
     const renderGameControls = () => {
         if (loading && !status) {
-            return <p className="text-lg">Loading ticket balance...</p>;
+            return <p className="text-lg text-gray-300">Loading ticket balance...</p>;
         }
         if (status) {
             return <p className="text-lg text-yellow-400">{status}</p>;
         }
 
         return (
-            <div>
-                <p className="text-lg">Your tickets: <span className="font-bold text-yellow-400">{ticketBalance}</span></p>
-                <div className="mt-6 flex flex-col space-y-4"> {/* Added flex and space-y for layout */}
+            <div className="w-full">
+                <p className="text-xl mb-4">Your tickets: <span className="font-bold text-purple-400">{ticketBalance}</span></p>
+                <div className="flex flex-col space-y-4">
                     <button 
                         onClick={handleBuyTicket}
-                        className="px-6 py-3 bg-purple-600 text-white text-lg rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-500"
+                        className="w-full px-6 py-3 bg-purple-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-purple-700 transition-all duration-200 ease-in-out disabled:bg-gray-500 disabled:cursor-not-allowed"
                         disabled={loading}
                     >
                         Buy Ticket (11 XPR)
                     </button>
-                    {ticketBalance > 0 && ( // Conditionally render Roll Dice button
+                    {ticketBalance > 0 && (
                         <button 
                             onClick={handleRollDice}
-                            className="px-8 py-4 bg-green-600 text-white text-xl font-semibold rounded-lg hover:bg-green-700 transition-transform hover:scale-105 disabled:bg-gray-500"
+                            className="w-full px-8 py-4 bg-green-600 text-white text-xl font-bold rounded-lg shadow-md hover:bg-green-700 transform hover:scale-105 transition-all duration-200 ease-in-out disabled:bg-gray-500 disabled:cursor-not-allowed"
                             disabled={loading}
                         >
                             Roll Dice
@@ -167,29 +165,31 @@ const GameInterface = () => {
     };
 
     return (
-        <div className="text-center">
-            <p className="mb-4">Welcome, <span className="font-bold">{session?.auth?.actor}</span>!</p>
-            <div className="my-8 p-6 border rounded-lg border-gray-600 min-h-[150px] flex items-center justify-center">
+        <div className="text-center p-6 bg-gray-800 rounded-xl shadow-2xl max-w-md mx-auto">
+            <p className="mb-4 text-lg text-gray-300">Welcome, <span className="font-bold text-blue-400">{session?.auth?.actor}</span>!</p>
+            <div className="my-8 p-6 bg-gray-900 rounded-lg shadow-inner min-h-[150px] flex items-center justify-center">
                 {renderGameControls()}
             </div>
             <Dice result={diceResult} rolling={isRolling} />
-            <button
-                onClick={logout}
-                className="mt-8 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-            >
-                Logout
-            </button>
-            <a
-                href="/history"
-                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors inline-block"
-            >
-                View Roll History
-            </a>
+            <div className="mt-8 flex justify-center space-x-4">
+                <button
+                    onClick={logout}
+                    className="px-6 py-3 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition-all duration-200 ease-in-out"
+                >
+                    Logout
+                </button>
+                <Link href="/history" passHref>
+                    <button
+                        className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-all duration-200 ease-in-out"
+                    >
+                        View Roll History
+                    </button>
+                </Link>
+            </div>
         </div>
     );
 };
 
-// The main page component
 export default function Home() {
     const { session, login } = useWallet();
 
@@ -197,14 +197,14 @@ export default function Home() {
         <main className="flex min-h-screen flex-col items-center justify-center p-12 bg-gray-900 text-white">
             <div className="z-10 w-full max-w-md items-center justify-center text-center">
                 <h1 className="text-6xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-blue-500 text-transparent bg-clip-text">11dice</h1>
-                <p className="text-gray-400 mb-10">The daily XPR dice game.</p>
+                <p className="text-gray-400 mb-10 text-xl">The daily XPR Network dice game.</p>
                 
                 {session ? (
                     <GameInterface />
                 ) : (
                     <button
                         onClick={login}
-                        className="px-8 py-4 bg-blue-600 text-white text-xl font-semibold rounded-lg hover:bg-blue-700 transition-transform hover:scale-105"
+                        className="px-8 py-4 bg-blue-600 text-white text-xl font-bold rounded-lg shadow-lg hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 ease-in-out"
                     >
                         Connect Wallet to Play
                     </button>
