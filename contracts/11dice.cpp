@@ -5,6 +5,13 @@
 const symbol XPR_SYMBOL = symbol("XPR", 4);
 const int64_t TICKET_PRICE = 110000; // 11.0000 XPR
 
+// Helper function for more robust pseudo-random number generation
+uint8_t generate_random_number(uint64_t seed) {
+    checksum256 hash = sha256(reinterpret_cast<const char*>(&seed), sizeof(seed));
+    uint64_t random_val = *reinterpret_cast<const uint64_t*>(hash.data());
+    return (static_cast<uint8_t>(random_val % 6)) + 1;
+}
+
 void onedice::rolldice(name account) {
     require_auth(account);
 
@@ -19,9 +26,8 @@ void onedice::rolldice(name account) {
         row.tickets--;
     });
 
-    // Simple pseudo-random number generation based on block info
-    // For a real-world application, a more robust oracle-based solution would be better.
-    uint8_t dice_roll = (static_cast<uint8_t>(current_time_point().elapsed.count() % 6)) + 1;
+    // Use the helper function for more robust pseudo-random number generation
+    uint8_t dice_roll = generate_random_number(current_time_point().elapsed.count());
     print("DICE_ROLL:", dice_roll); // Add this line
 
     // Record the roll in the new roll_entries_table
@@ -37,9 +43,9 @@ void onedice::rolldice(name account) {
 void onedice::drawresult() {
     require_auth(get_self()); // Only the contract itself can call this action
 
-    // Generate winning roll using combined entropy
+    // Generate a winning roll using a more robust pseudo-random number generation
     uint64_t seed = current_time_point().elapsed.count() + current_block_time().to_time_point().elapsed.count();
-    uint8_t winning_roll = (static_cast<uint8_t>(seed % 6)) + 1;
+    uint8_t winning_roll = generate_random_number(seed);
     print("WINNING_ROLL:", winning_roll);
 
     // Calculate today's date range (UTC)
