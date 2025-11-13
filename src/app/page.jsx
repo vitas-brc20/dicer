@@ -1,3 +1,5 @@
+"use client";
+
 import { useWallet } from "@/components/Wallet";
 import { getTicketBalance, getLatestRoll } from "@/lib/blockchain";
 import { useEffect, useState } from "react";
@@ -123,8 +125,7 @@ const GameInterface = () => {
                 setStatus(`Roll failed: An unknown error occurred.`);
             }
             setStatus('');
-        }
-        finally {
+        } finally {
             setLoading(false);
             setIsRolling(false);
         }
