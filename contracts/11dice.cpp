@@ -43,6 +43,15 @@ void onedice::rolldice(name account) {
         row.roll_result = dice_roll;
         row.roll_time = current_time_point();
     });
+
+    // Also record the roll in the historical table
+    rolls_hist_table rolls_hist(get_self(), get_self().value);
+    rolls_hist.emplace(account, [&](auto& row) {
+        row.id = rolls_hist.available_primary_key();
+        row.player_account = account;
+        row.roll_result = dice_roll;
+        row.roll_time = current_time_point();
+    });
 }
 
 void onedice::drawresult() {

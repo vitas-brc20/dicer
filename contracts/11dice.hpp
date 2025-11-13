@@ -67,6 +67,22 @@ private:
         indexed_by<"bytime"_n, const_mem_fun<roll_entry, uint64_t, &roll_entry::by_time>>
     > roll_entries_table;
 
+    // New table to store historical dice roll entries
+    TABLE roll_history_entry {
+        uint64_t        id; // Primary key for the roll entry
+        name            player_account;
+        uint8_t         roll_result;
+        time_point_sec  roll_time;
+
+        uint64_t primary_key() const { return id; }
+        uint64_t by_player() const { return player_account.value; }
+        uint64_t by_time() const { return roll_time.sec_since_epoch(); }
+    };
+    typedef multi_index<"rollshist"_n, roll_history_entry,
+        indexed_by<"byplayer"_n, const_mem_fun<roll_history_entry, uint64_t, &roll_history_entry::by_player>>,
+        indexed_by<"bytime"_n, const_mem_fun<roll_history_entry, uint64_t, &roll_history_entry::by_time>>
+    > rolls_hist_table;
+
     // New table to store payout entries
     TABLE payout_entry {
         uint64_t        id; // Primary key for the payout entry
@@ -83,4 +99,14 @@ private:
         indexed_by<"bywinner"_n, const_mem_fun<payout_entry, uint64_t, &payout_entry::by_winner>>,
         indexed_by<"bycreated"_n, const_mem_fun<payout_entry, uint64_t, &payout_entry::by_created>>
     > payout_queue_table;
+
+    TABLE winning_roll_entry { // New table to record daily winning rolls
+        uint64_t        id; // Primary key, e.g., current day's timestamp (seconds since epoch)
+        uint8_t         winning_roll;
+        time_point_sec  draw_time;
+
+        uint64_t primary_key() const { return id; }
+    };
+
+    typedef multi_index<"winrolls"_n, winning_roll_entry> winning_rolls_table;
 };
