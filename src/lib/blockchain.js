@@ -33,3 +33,34 @@ export const getTicketBalance = async (actor) => {
         return 0;
     }
 };
+
+/**
+ * Fetches the latest dice roll for a given account from the smart contract.
+ * @param actor - The user's account name.
+ * @returns The latest dice roll result (1-6), or null if not found.
+ */
+export const getLatestRoll = async (actor) => {
+    try {
+        const result = await rpc.get_table_rows({
+            json: true,
+            code: CONTRACT_ACCOUNT,
+            scope: CONTRACT_ACCOUNT,
+            table: 'rolls',
+            lower_bound: actor,
+            upper_bound: actor,
+            index_position: 'byplayer', // Use the secondary index for player account
+            key_type: 'name',
+            limit: 1,
+            reverse: true, // Get the latest roll
+        });
+
+        if (result.rows.length > 0 && result.rows[0].player_account === actor) {
+            return result.rows[0].roll_result;
+        }
+
+        return null;
+    } catch (e) {
+        console.error('Error fetching latest roll:', e);
+        return null;
+    }
+};

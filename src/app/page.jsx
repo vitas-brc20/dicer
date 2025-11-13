@@ -1,10 +1,12 @@
 "use client";
 
 import { useWallet } from "@/components/Wallet";
-import { getTicketBalance } from "@/lib/blockchain";
+import { getTicketBalance, getLatestRoll } from "@/lib/blockchain";
 import { useEffect, useState } from "react";
 
 const Dice = ({ result }) => {
+
+
     if (!result) return null;
     return (
         <div className="mt-4 p-4 border-2 border-dashed border-green-400 rounded-lg">
@@ -98,19 +100,14 @@ const GameInterface = () => {
                 data: { account: session.auth.actor },
             }]);
 
-            // 3. Parse result and show dice roll from console output
-            const rolldiceTrace = result.processed.action_traces.find(trace => trace.act.name === 'rolldice');
-            if (!rolldiceTrace || !rolldiceTrace.console) {
-                throw new Error('Could not find rolldice trace or console output in transaction.');
+            // 3. Get dice roll from the smart contract table
+            setStatus('Roll successful! Fetching result...');
+            const roll = await getLatestRoll(session.auth.actor);
+            if (roll === null) {
+                throw new Error('Could not retrieve latest roll from contract.');
             }
-            const consoleOutput = rolldiceTrace.console;
-            const rollMatch = consoleOutput.match(/DICE_ROLL:(\d+)/);
-            if (!rollMatch || rollMatch.length < 2) {
-                throw new Error('Could not parse dice roll from console output.');
-            }
-            const roll = parseInt(rollMatch[1], 10);
             setDiceResult(roll);
-            setStatus('Roll successful! Refreshing balance...');
+            setStatus('Roll recorded! Refreshing balance...');
 
             // 4. Refresh balance
             await refreshBalance();
