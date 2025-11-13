@@ -15,48 +15,32 @@ export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
     const [link, setLink] = useState(null); // Store link for logout
 
-    // Effect for session restoration from localStorage
+    // Effect for session restoration from localStorage (user's suggested approach)
     useEffect(() => {
         const restoreSessionFromLocalStorage = async () => {
-            const savedActor = localStorage.getItem('proton_actor');
-            const savedPermission = localStorage.getItem('proton_permission');
-            const savedChainId = localStorage.getItem('proton_chainId');
+            const savedSessionString = localStorage.getItem('proton-session');
+            console.log("Attempting to restore session from localStorage...");
+            console.log("  savedSessionString:", savedSessionString);
 
-            if (savedActor && savedPermission && savedChainId) {
-                console.log("Attempting to restore session from localStorage details...");
-                console.log("  savedActor:", savedActor);
-                console.log("  savedPermission:", savedPermission);
-                console.log("  savedChainId from localStorage:", savedChainId); // New debug log
+            if (savedSessionString) {
                 try {
-                    // Try to re-establish session using saved details
-                    const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
-                        linkOptions: { endpoints: ['https://proton.greymass.com'], chainId: savedChainId },
-                        selectorOptions: {
-                            appName: '11dice',
-                        },
-                        restoreSession: true, // Use SDK's restore mechanism
-                    });
-
-                    if (restoredSession) {
-                        setSession(restoredSession);
-                        setLink(restoredLink);
-                        console.log("Restored session from localStorage details:", restoredSession);
-                        console.log("Restored link from localStorage details:", restoredLink);
+                    const parsedSession = JSON.parse(savedSessionString);
+                    // Check if the parsed session is functional enough (e.g., has transact method)
+                    if (parsedSession && typeof parsedSession.transact === 'function') {
+                        setSession(parsedSession);
+                        // Note: The 'link' object is not directly stored/restored this way.
+                        // This might cause issues with logout. We'll need to address that.
+                        console.log("Restored session from localStorage (parsed):", parsedSession);
                     } else {
-                        console.log("ProtonWebSDK returned null for restoredSession."); // New debug log
-                        console.log("Could not re-establish session with saved details (ProtonWebSDK returned null).");
-                        localStorage.removeItem('proton_actor');
-                        localStorage.removeItem('proton_permission');
-                        localStorage.removeItem('proton_chainId');
+                        console.log("Parsed session is not functional, clearing localStorage.");
+                        localStorage.removeItem('proton-session');
                     }
                 } catch (e) {
-                    console.error("Session re-establishment failed:", e);
-                    localStorage.removeItem('proton_actor');
-                    localStorage.removeItem('proton_permission');
-                    localStorage.removeItem('proton_chainId');
+                    console.error("Could not parse saved session from localStorage:", e);
+                    localStorage.removeItem('proton-session');
                 }
             } else {
-                console.log("No saved session details found in localStorage.");
+                console.log("No saved session found in localStorage.");
             }
         };
         restoreSessionFromLocalStorage();
@@ -75,10 +59,8 @@ export const WalletProvider = ({ children }) => {
             });
             setSession(newSession);
             setLink(newLink);
-            // Save minimal session details to localStorage
-            localStorage.setItem('proton_actor', newSession.auth.actor);
-            localStorage.setItem('proton_permission', newSession.auth.permission);
-            localStorage.setItem('proton_chainId', newSession.chainId.toString()); // Use toString() for ChainId object
+            // Save entire session object to localStorage (user's suggested approach)
+            localStorage.setItem('proton-session', JSON.stringify(newSession));
             console.log("New session after login:", newSession); // Debug log
         } catch (e) {
             console.error("Login failed", e);
@@ -90,9 +72,7 @@ export const WalletProvider = ({ children }) => {
             try {
                 await link.removeSession('11dice', session.auth, session.chainId);
                 // Clear persistence
-                localStorage.removeItem('proton_actor');
-                localStorage.removeItem('proton_permission');
-                localStorage.removeItem('proton_chainId');
+                localStorage.removeItem('proton-session');
                 setSession(null);
                 setLink(null);
             } catch (e) {
