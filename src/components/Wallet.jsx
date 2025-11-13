@@ -43,6 +43,7 @@ export const WalletProvider = ({ children }) => {
                         console.log("Restored session from localStorage details:", restoredSession);
                         console.log("Restored link from localStorage details:", restoredLink);
                     } else {
+                        console.log("ProtonWebSDK returned null for restoredSession."); // New debug log
                         console.log("Could not re-establish session with saved details (ProtonWebSDK returned null).");
                         localStorage.removeItem('proton_actor');
                         localStorage.removeItem('proton_permission');
