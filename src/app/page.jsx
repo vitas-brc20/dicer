@@ -8,17 +8,17 @@ import Link from "next/link"; // Import Link for navigation
 const Dice = ({ result, rolling }) => {
     if (rolling) {
         return (
-            <div className="mt-4 p-4 bg-gray-800 rounded-lg shadow-lg flex flex-col items-center justify-center min-h-[150px]">
-                <p className="text-xl text-gray-300">Rolling...</p>
-                <p className="text-7xl font-bold text-blue-400 animate-bounce">🎲</p>
+            <div className="mt-6 p-6 bg-dark-card rounded-xl shadow-lg flex flex-col items-center justify-center min-h-[180px] border-2 border-pastel-blue animate-pulse">
+                <p className="text-xl text-pastel-blue font-pixel">Rolling...</p>
+                <p className="text-8xl font-pixel text-accent-light animate-bounce">🎲</p>
             </div>
         );
     }
     if (result === null) return null;
     return (
-        <div className="mt-4 p-4 bg-gray-800 rounded-lg shadow-lg flex flex-col items-center justify-center min-h-[150px]">
-            <p className="text-xl text-gray-300">You rolled:</p>
-            <p className="text-7xl font-bold text-green-400">{result}</p>
+        <div className="mt-6 p-6 bg-dark-card rounded-xl shadow-lg flex flex-col items-center justify-center min-h-[180px] border-2 border-pastel-green">
+            <p className="text-xl text-pastel-green font-pixel">You rolled:</p>
+            <p className="text-8xl font-pixel text-accent-light">{result}</p>
         </div>
     )
 }
@@ -133,19 +133,19 @@ const GameInterface = () => {
 
     const renderGameControls = () => {
         if (loading && !status) {
-            return <p className="text-lg text-gray-300">Loading ticket balance...</p>;
+            return <p className="text-lg text-pastel-blue font-pixel">Loading ticket balance...</p>;
         }
         if (status) {
-            return <p className="text-lg text-yellow-400">{status}</p>;
+            return <p className="text-lg text-pastel-yellow font-pixel">{status}</p>;
         }
 
         return (
             <div className="w-full">
-                <p className="text-xl mb-4">Your tickets: <span className="font-bold text-purple-400">{ticketBalance}</span></p>
+                <p className="text-xl mb-4 text-pastel-green font-pixel">Your tickets: <span className="font-bold text-accent-light">{ticketBalance}</span></p>
                 <div className="flex flex-col space-y-4">
                     <button 
                         onClick={handleBuyTicket}
-                        className="w-full px-6 py-3 bg-purple-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-purple-700 transition-all duration-200 ease-in-out disabled:bg-gray-500 disabled:cursor-not-allowed"
+                        className="w-full px-6 py-3 bg-pastel-purple text-dark-bg text-lg font-pixel rounded-xl shadow-md hover:bg-pastel-pink transition-all duration-200 ease-in-out disabled:bg-gray-500 disabled:cursor-not-allowed border-2 border-pastel-purple hover:border-pastel-pink"
                         disabled={loading}
                     >
                         Buy Ticket (11 XPR)
@@ -153,7 +153,7 @@ const GameInterface = () => {
                     {ticketBalance > 0 && (
                         <button 
                             onClick={handleRollDice}
-                            className="w-full px-8 py-4 bg-green-600 text-white text-xl font-bold rounded-lg shadow-md hover:bg-green-700 transform hover:scale-105 transition-all duration-200 ease-in-out disabled:bg-gray-500 disabled:cursor-not-allowed"
+                            className="w-full px-8 py-4 bg-pastel-green text-dark-bg text-xl font-pixel rounded-xl shadow-md hover:bg-accent-light transform hover:scale-105 transition-all duration-200 ease-in-out disabled:bg-gray-500 disabled:cursor-not-allowed border-2 border-pastel-green hover:border-accent-light"
                             disabled={loading}
                         >
                             Roll Dice
@@ -165,22 +165,22 @@ const GameInterface = () => {
     };
 
     return (
-        <div className="text-center p-6 bg-gray-800 rounded-xl shadow-2xl max-w-md mx-auto">
-            <p className="mb-4 text-lg text-gray-300">Welcome, <span className="font-bold text-blue-400">{session?.auth?.actor}</span>!</p>
-            <div className="my-8 p-6 bg-gray-900 rounded-lg shadow-inner min-h-[150px] flex items-center justify-center">
+        <div className="text-center p-8 bg-dark-card rounded-xl shadow-2xl max-w-md mx-auto border-4 border-pastel-blue">
+            <p className="mb-4 text-lg text-pastel-blue font-pixel">Welcome, <span className="font-bold text-accent-light">{session?.auth?.actor}</span>!</p>
+            <div className="my-8 p-6 bg-dark-bg rounded-xl shadow-inner min-h-[150px] flex items-center justify-center border-2 border-pastel-purple">
                 {renderGameControls()}
             </div>
             <Dice result={diceResult} rolling={isRolling} />
-            <div className="mt-8 flex justify-center space-x-4">
+            <div className="mt-8 flex flex-col space-y-4">
                 <button
                     onClick={logout}
-                    className="px-6 py-3 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition-all duration-200 ease-in-out"
+                    className="px-6 py-3 bg-pastel-pink text-dark-bg rounded-xl shadow-md hover:bg-red-500 transition-all duration-200 ease-in-out border-2 border-pastel-pink hover:border-red-500 font-pixel"
                 >
                     Logout
                 </button>
                 <Link href="/history" passHref>
                     <button
-                        className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-all duration-200 ease-in-out"
+                        className="px-6 py-3 bg-pastel-blue text-dark-bg rounded-xl shadow-md hover:bg-blue-500 transition-all duration-200 ease-in-out border-2 border-pastel-blue hover:border-blue-500 font-pixel"
                     >
                         View Roll History
                     </button>
@@ -194,17 +194,17 @@ export default function Home() {
     const { session, login } = useWallet();
 
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center p-12 bg-gray-900 text-white">
+        <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-dark-bg text-white">
             <div className="z-10 w-full max-w-md items-center justify-center text-center">
-                <h1 className="text-6xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-blue-500 text-transparent bg-clip-text">11dice</h1>
-                <p className="text-gray-400 mb-10 text-xl">The daily XPR Network dice game.</p>
+                <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-pastel-purple to-pastel-blue text-transparent bg-clip-text font-pixel leading-tight">11dice</h1>
+                <p className="text-pastel-green mb-10 text-xl font-pixel">The daily XPR Network dice game.</p>
                 
                 {session ? (
                     <GameInterface />
                 ) : (
                     <button
                         onClick={login}
-                        className="px-8 py-4 bg-blue-600 text-white text-xl font-bold rounded-lg shadow-lg hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 ease-in-out"
+                        className="px-8 py-4 bg-pastel-green text-dark-bg text-xl font-bold rounded-xl shadow-lg hover:bg-accent-light transform hover:scale-105 transition-all duration-200 ease-in-out border-4 border-pastel-green hover:border-accent-light font-pixel"
                     >
                         Connect Wallet to Play
                     </button>

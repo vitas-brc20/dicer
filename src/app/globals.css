@@ -1,3 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Pastel Fantasy Palette */
+  --color-pastel-blue: #A7C7E7;
+  --color-pastel-green: #B2D8B2;
+  --color-pastel-pink: #FFB6C1;
+  --color-pastel-yellow: #FDFD96;
+  --color-pastel-purple: #B19CD9;
+  --color-dark-bg: #282c34;
+  --color-dark-card: #3a3f47;
+  --color-accent-light: #8AFF8A;
+  --color-accent-dark: #4CAF50;
+}
+
+body {
+  font-family: 'Press Start 2P', cursive;
+  background-color: var(--color-dark-bg);
+}
