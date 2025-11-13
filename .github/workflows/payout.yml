@@ -13,5 +13,5 @@ jobs:
       - name: Trigger Payout API
         run: |
           curl --request POST \
-            --url '${{ secrets.PAYOUT_URL }}' \
+            --url '${{ secrets.PAYOUT_API_URL }}' \
             --header 'Authorization: Bearer ${{ secrets.CRON_SECRET }}'
