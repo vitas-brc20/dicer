@@ -1,20 +1,13 @@
 import { JsonRpc } from '@proton/js';
 import { Name } from '@greymass/eosio';
 
-// TODO: Replace with the actual RPC endpoint for the network you are using (e.g., Proton Mainnet, Testnet)
-const rpc = new JsonRpc(['https://proton.greymass.com']); 
-
-// TODO: Replace with your contract account name
+const rpc = new JsonRpc(['https://proton.greymass.com']);
 const CONTRACT_ACCOUNT = 'inchgame';
 
-/**
- * Fetches the ticket balance for a given account from the smart contract.
- * @param actor - The user's account name.
- * @returns The number of tickets the user has, or 0 if not found.
- */
 export const getTicketBalance = async (actor) => {
     try {
-        const result = await rpc.get_table_rows({
+        console.log("getTicketBalance: Fetching balance for actor:", actor);
+        const rpcParams = {
             json: true,
             code: CONTRACT_ACCOUNT,
             scope: CONTRACT_ACCOUNT,
@@ -22,46 +15,49 @@ export const getTicketBalance = async (actor) => {
             lower_bound: actor,
             upper_bound: actor,
             limit: 1,
-        });
+            show_payer: false,
+        };
+        console.log("getTicketBalance: RPC params:", rpcParams);
+        const result = await rpc.get_table_rows(rpcParams);
+        console.log("getTicketBalance: RPC response:", result);
 
-        if (result.rows.length > 0 && result.rows[0].account === actor) {
+        if (result.rows.length > 0) {
             return result.rows[0].tickets;
         }
-
         return 0;
     } catch (e) {
-        console.error('Error fetching ticket balance:', e);
+        console.error("Error getting ticket balance:", e);
         return 0;
     }
 };
 
-/**
- * Fetches the latest dice roll for a given account from the smart contract.
- * @param actor - The user's account name.
- * @returns The latest dice roll result (1-6), or null if not found.
- */
 export const getLatestRoll = async (actor) => {
     try {
-        const result = await rpc.get_table_rows({
+        console.log("getLatestRoll: Fetching latest roll for actor:", actor);
+        const actorName = new Name(actor);
+        const rpcParams = {
             json: true,
             code: CONTRACT_ACCOUNT,
             scope: CONTRACT_ACCOUNT,
-            table: 'rolls',
-            lower_bound: new Name(actor).value.toString(), // Convert name to uint64_t string
-            upper_bound: new Name(actor).value.toString(), // Convert name to uint64_t string
-            index_position: '1', // Use the first secondary index (byplayer)
-            key_type: 'i64', // Re-added: Correct key type for uint64_t
+            table: 'rolls', // Temporary rolls table
+            lower_bound: actorName.value.toString(),
+            upper_bound: actorName.value.toString(),
+            index_position: 'byplayer', // Use byplayer index
+            key_type: 'i64',
             limit: 1,
-            reverse: true, // Get the latest roll
-        });
+            reverse: true, // Get most recent first
+            show_payer: false,
+        };
+        console.log("getLatestRoll: RPC params:", rpcParams);
+        const result = await rpc.get_table_rows(rpcParams);
+        console.log("getLatestRoll: RPC response:", result);
 
-        if (result.rows.length > 0 && result.rows[0].player_account === actor) {
+        if (result.rows.length > 0) {
             return result.rows[0].roll_result;
         }
-
         return null;
     } catch (e) {
-        console.error('Error fetching latest roll:', e);
+        console.error("Error getting latest roll:", e);
         return null;
     }
 };
