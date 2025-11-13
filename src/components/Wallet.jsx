@@ -11,6 +11,14 @@ const WalletContext = createContext({
     transact: async (actions) => { throw new Error("Wallet not connected"); }
 });
 
+// Helper function for timeout
+function withTimeout(promise, ms) {
+    return Promise.race([
+        promise,
+        new Promise((resolve, reject) => setTimeout(() => reject(new Error('ProtonWebSDK timeout')), ms))
+    ]);
+}
+
 export const WalletProvider = ({ children }) => {
     const [session, setSession] = useState(null);
     const [link, setLink] = useState(null); // Store link for logout
@@ -28,14 +36,17 @@ export const WalletProvider = ({ children }) => {
                 console.log("  savedPermission:", savedPermission);
                 console.log("  savedChainId from localStorage:", savedChainId);
                 try {
-                    // Try to re-establish session using saved details
-                    const { session: restoredSession, link: restoredLink } = await ProtonWebSDK({
-                        linkOptions: { endpoints: ['https://proton.greymass.com'], chainId: savedChainId },
-                        selectorOptions: {
-                            appName: '11dice',
-                        },
-                        restoreSession: true, // Use SDK's restore mechanism
-                    });
+                    // Try to re-establish session using saved details with a timeout
+                    const { session: restoredSession, link: restoredLink } = await withTimeout(
+                        ProtonWebSDK({
+                            linkOptions: { endpoints: ['https://proton.greymass.com'], chainId: savedChainId },
+                            selectorOptions: {
+                                appName: '11dice',
+                            },
+                            restoreSession: true, // Use SDK's restore mechanism
+                        }),
+                        5000 // 5 seconds timeout
+                    );
 
                     if (restoredSession) {
                         setSession(restoredSession);
