@@ -126,6 +126,7 @@ const GameInterface = () => {
             } else {
                 setStatus(`Roll failed: An unknown error occurred.`);
             }
+            setStatus(''); // Clear status message after displaying error
         } finally {
             setLoading(false);
             setIsRolling(false); // Stop rolling animation
