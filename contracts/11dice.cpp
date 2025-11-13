@@ -99,6 +99,14 @@ void onedice::drawresult() {
         });
     }
 
+    // Store the winning roll for transparency
+    winning_rolls_table winrolls(get_self(), get_self().value);
+    winrolls.emplace(get_self(), [&](auto& row) {
+        row.id = draw_time.sec_since_epoch();
+        row.winning_roll = winning_roll;
+        row.draw_time = draw_time;
+    });
+
     // Clear today's rolls after payout determination
     itr = rolls_by_time.lower_bound(current_day_start.sec_since_epoch());
     while (itr != rolls_by_time.end() && itr->roll_time < next_day_start) {
