@@ -34,16 +34,16 @@ export const getTicketBalance = async (actor) => {
 export const getLatestRoll = async (actor) => {
     try {
         console.log("getLatestRoll: Fetching latest roll for actor:", actor);
-        const actorName = new Name(actor);
+        // Aligning with user's working query
         const rpcParams = {
             json: true,
             code: CONTRACT_ACCOUNT,
             scope: CONTRACT_ACCOUNT,
             table: 'rolls', // Temporary rolls table
-            lower_bound: actorName.value.toString(),
-            upper_bound: actorName.value.toString(),
-            index_position: 'byplayer', // Use byplayer index
-            key_type: 'i64',
+            lower_bound: '', // As per user's working query
+            upper_bound: actor, // As per user's working query
+            index_position: 1, // As per user's working query (1 for byplayer)
+            key_type: '', // As per user's working query
             limit: 1,
             reverse: true, // Get most recent first
             show_payer: false,
