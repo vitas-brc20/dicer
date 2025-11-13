@@ -1,5 +1,10 @@
 #include "11dice.hpp"
-#include <eosio/system.hpp> // Explicitly include for tapos_block_prefix()
+#include <eosio/eosio.hpp>
+#include <eosio/asset.hpp>
+#include <eosio/system.hpp>
+#include <eosio/crypto.hpp> // Required for sha256
+
+using namespace eosio;
 
 // Constants for the game
 const symbol XPR_SYMBOL = symbol("XPR", 4);
