@@ -10,8 +10,17 @@ jobs:
   run-payout:
     runs-on: ubuntu-latest
     steps:
+      - name: Trigger Winrolls API
+        run: |
+          curl --request POST \
+            --url '${{ secrets.PAYOUT_API_URL }}/winrolls' \
+            --header 'Authorization: Bearer ${{ secrets.CRON_SECRET }}'
+      
+      - name: Wait for 10 seconds
+        run: sleep 10
+        
       - name: Trigger Payout API
         run: |
           curl --request POST \
-            --url '${{ secrets.PAYOUT_API_URL }}' \
+            --url '${{ secrets.PAYOUT_API_URL }}/payout' \
             --header 'Authorization: Bearer ${{ secrets.CRON_SECRET }}'

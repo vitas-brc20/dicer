@@ -18,30 +18,7 @@ export async function POST(request) {
     }
 
     try {
-        // 2. --- Call drawresult action on the smart contract ---
-        // This populates the payout_queue table
-        const drawResultActions = [{
-            account: CONTRACT_ACCOUNT,
-            name: 'drawresult',
-            authorization: [{
-                actor: process.env.PAYOUT_ACCOUNT_NAME,
-                permission: process.env.PAYOUT_ACCOUNT_PERMISSION,
-            }],
-            data: {},
-        }];
-
-        const drawResultTx = await api.transact({ actions: drawResultActions }, {
-            blocksBehind: 3,
-            expireSeconds: 30,
-        });
-
-        console.log('drawresult action successfully called:', drawResultTx.transaction_id);
-
-        // Add a small delay to ensure drawresult transaction is processed
-        // This is important because we immediately try to read the table after.
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // 3. --- Fetch pending payouts from payout_queue table ---
+        // 2. --- Fetch pending payouts from payout_queue table ---
         const payoutQueueResult = await rpc.get_table_rows({
             json: true,
             code: CONTRACT_ACCOUNT,
@@ -56,14 +33,13 @@ export async function POST(request) {
 
         if (pendingPayouts.length === 0) {
             return NextResponse.json({
-                message: 'drawresult action called, but no pending payouts to process.',
-                drawResultTransactionId: drawResultTx.transaction_id,
+                message: 'No pending payouts to process.',
             });
         }
 
         console.log(`Found ${pendingPayouts.length} pending payouts.`);
 
-        // 4. --- Process each pending payout ---
+        // 3. --- Process each pending payout ---
         const processedPayouts = [];
         for (const payout of pendingPayouts) {
             try {
@@ -111,10 +87,9 @@ export async function POST(request) {
             }
         }
 
-        // 5. --- Return Success Response ---
+        // 4. --- Return Success Response ---
         return NextResponse.json({
             message: 'Payout process completed.',
-            drawResultTransactionId: drawResultTx.transaction_id,
             processedPayouts: processedPayouts,
             unprocessedPayoutsCount: pendingPayouts.length - processedPayouts.length,
         });
