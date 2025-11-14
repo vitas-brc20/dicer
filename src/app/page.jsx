@@ -8,7 +8,7 @@ import Link from "next/link"; // Import Link for navigation
 const Dice = ({ result, rolling }) => {
     if (rolling) {
         return (
-            <div className="mt-6 p-6 bg-dark-card rounded-xl shadow-lg flex flex-col items-center justify-center min-h-[180px] border-2 border-pastel-blue-dark animate-pulse">
+            <div className="dice-card">
                 <p className="text-xl text-pastel-blue-dark">Rolling...</p>
                 <p className="text-8xl text-accent-green animate-bounce">🎲</p>
             </div>
@@ -16,7 +16,7 @@ const Dice = ({ result, rolling }) => {
     }
     if (result === null) return null;
     return (
-        <div className="mt-6 p-6 bg-dark-card rounded-xl shadow-lg flex flex-col items-center justify-center min-h-[180px] border-2 border-pastel-green">
+        <div className="dice-result-card">
             <p className="text-xl text-pastel-green">You rolled:</p>
             <p className="text-8xl text-accent-green">{result}</p>
         </div>
@@ -115,8 +115,8 @@ const GameInterface = () => {
             setTransactionMessage(`Dice roll successful! Tx ID: ${result.transactionId}`);
 
             setStatus('Roll successful! Fetching result...');
-            // Add a small delay to allow blockchain to propagate
-            await new Promise(resolve => setTimeout(resolve, 1000)); 
+            // Add a 5-second delay to allow blockchain to propagate
+            await new Promise(resolve => setTimeout(resolve, 5000)); 
             const roll = await getLatestRoll(session.auth.actor);
             console.log("handleRollDice: Fetched roll:", roll);
 
@@ -156,7 +156,7 @@ const GameInterface = () => {
                 <div className="flex flex-col space-y-4">
                     <button 
                         onClick={handleBuyTicket}
-                        className="w-full px-6 py-3 bg-pastel-purple text-dark-text text-lg rounded-xl shadow-xl hover:bg-pastel-pink transition-all duration-200 ease-in-out active:translate-y-0.5 border-solid border-2 border-pastel-purple hover:border-pastel-pink"
+                        className="btn-xpr"
                         disabled={loading}
                     >
                         Buy Ticket (11 XPR)
@@ -164,7 +164,7 @@ const GameInterface = () => {
                     {ticketBalance > 0 && (
                         <button 
                             onClick={handleRollDice}
-                            className="w-full px-8 py-4 bg-pastel-green text-dark-text text-xl rounded-xl shadow-xl hover:bg-accent-green transform hover:scale-105 transition-all duration-200 ease-in-out active:translate-y-0.5 border-solid border-2 border-pastel-green hover:border-accent-green"
+                            className="btn-xpr"
                             disabled={loading}
                         >
                             Roll Dice
@@ -176,9 +176,9 @@ const GameInterface = () => {
     };
 
     return (
-        <div className="text-center p-8 bg-dark-card rounded-xl shadow-2xl max-w-md mx-auto border-4 border-pastel-blue-dark">
+        <div className="card-base">
             <p className="mb-4 text-lg text-pastel-blue-dark">Welcome, <span className="font-bold text-accent-green">{session?.auth?.actor}</span>!</p>
-            <div className="my-8 p-6 bg-dark-bg rounded-xl shadow-inner min-h-[150px] flex items-center justify-center border-2 border-pastel-purple">
+            <div className="card-inner">
                 {renderGameControls()}
             </div>
             {transactionMessage && (
@@ -188,13 +188,13 @@ const GameInterface = () => {
             <div className="mt-8 flex flex-col space-y-4">
                 <button
                     onClick={logout}
-                    className="px-6 py-3 bg-pastel-pink text-dark-text rounded-xl shadow-xl hover:bg-red-500 transition-all duration-200 ease-in-out active:translate-y-0.5 border-solid border-2 border-pastel-pink hover:border-red-500"
+                    className="btn-secondary"
                 >
                     Logout
                 </button>
                 <Link href="/history" passHref>
                     <button
-                        className="px-6 py-3 bg-pastel-blue-dark text-dark-text rounded-xl shadow-xl hover:bg-accent-blue transition-all duration-200 ease-in-out active:translate-y-0.5 border-solid border-2 border-pastel-blue-dark hover:border-accent-blue"
+                        className="btn-xpr"
                     >
                         View Roll History
                     </button>
@@ -209,7 +209,7 @@ export default function Home() {
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-dark-bg text-dark-text">
-            <div className="z-10 w-full max-w-md items-center justify-center text-center">
+            <div className="z-10 w-full max-w-sm text-center">
                 <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-pastel-purple to-pastel-blue-dark text-transparent bg-clip-text leading-tight">11dice</h1>
                 <p className="text-pastel-green mb-10 text-xl">The daily XPR Network dice game.</p>
                 
@@ -218,7 +218,7 @@ export default function Home() {
                 ) : (
                     <button
                         onClick={login}
-                        className="px-8 py-4 bg-pastel-green text-dark-text text-xl font-bold rounded-xl shadow-xl hover:bg-accent-green transform hover:scale-105 transition-all duration-200 ease-in-out active:translate-y-0.5 border-solid border-4 border-pastel-green hover:border-accent-green"
+                        className="btn-xpr"
                     >
                         Connect Wallet to Play
                     </button>

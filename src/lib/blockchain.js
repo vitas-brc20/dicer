@@ -46,7 +46,7 @@ export const getLatestRoll = async (actor) => {
             key_type: '', // As per user's working query
             limit: 1,
             reverse: true, // Get most recent first
-            show_payer: false,
+            show_payer: true, // Changed from false
         };
         console.log("getLatestRoll: RPC params:", rpcParams);
         const result = await rpc.get_table_rows(rpcParams);
