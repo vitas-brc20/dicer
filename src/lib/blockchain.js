@@ -53,7 +53,11 @@ export const getLatestRoll = async (actor) => {
         console.log("getLatestRoll: RPC response:", result);
 
         if (result.rows.length > 0) {
-            return result.rows[0].roll_result;
+            const row = result.rows[0];
+            if (row.data && typeof row.data.roll_result !== 'undefined') {
+                return row.data.roll_result;
+            }
+            return row.roll_result;
         }
         return null;
     } catch (e) {
